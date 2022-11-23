@@ -8,8 +8,8 @@
 
     <ShellContent
         Title="NoToday"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        ContentTemplate="{DataTemplate local:HistoryPage}"
+        Route="HistoryPage" />
 
 </Shell>
 

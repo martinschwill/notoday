@@ -8,12 +8,11 @@ public partial class BaseViewModel : ObservableObject
     }
 
     [ObservableProperty]
-  //  [AlsoNotifyChangeFor(nameof(IsNotBusy))]   <--- to nie działa, trzeba się dowiedzieć dlaczego 
+    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
     bool isBusy;
 
     [ObservableProperty]
-    string date; 
-
+    string date;
 
     public bool IsNotBusy => !isBusy; 
 

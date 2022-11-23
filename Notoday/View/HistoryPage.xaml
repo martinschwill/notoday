@@ -8,5 +8,8 @@
             Text="Welcome to .NET MAUI!"
             VerticalOptions="Center" 
             HorizontalOptions="Center" />
+        <DatePicker
+            VerticalOptions="Center"
+            HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>
