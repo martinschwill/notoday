@@ -59,6 +59,7 @@
 	  <None Remove="CommunityToolkit.Mvvm" />
 	  <None Remove="Services\" />
 	  <None Remove="Model\" />
+	  <None Remove="Resources\Raw\questions.json" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="View\" />
@@ -76,5 +77,8 @@
 	  <MauiXaml Update="View\HistoryPage.xaml">
 	    <SubType></SubType>
 	  </MauiXaml>
+	</ItemGroup>
+	<ItemGroup>
+	  <BundleResource Include="Resources\Raw\questions.json" />
 	</ItemGroup>
 </Project>

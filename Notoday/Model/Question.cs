@@ -1,11 +1,9 @@
-﻿using System;
-namespace Notoday.Model
+﻿namespace Notoday.Model;
+
+public class Question
 {
-	public class Question
-	{
-		public Question()
-		{
-		}
-	}
+	public string Name { get; set; }
+
+	public bool Exists { get; set; } 
 }
 

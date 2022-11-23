@@ -12,7 +12,7 @@ public partial class BaseViewModel : ObservableObject
     bool isBusy;
 
     [ObservableProperty]
-    string date;
+    string day;
 
     public bool IsNotBusy => !isBusy; 
 

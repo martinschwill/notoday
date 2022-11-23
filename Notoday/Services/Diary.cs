@@ -4,8 +4,10 @@ public class Diary
 {
     public List<Day> Days = new(); 
 
-    public Diary()
+    public List<Day> GetHistory()
     {
+
+        return Days; 
     }
 }
 
