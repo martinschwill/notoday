@@ -1,16 +1,21 @@
 ﻿namespace Notoday.Model; 
 
-public class Day
+public partial class Day : ObservableObject
 {
 	public string Date { get; set; }
 
-	public List<Question> questions = new(); 
+	[ObservableProperty]
+	[NotifyPropertyChangedFor(nameof(howManyCravings))] 
+	public List<Question> questions;
 
 	public Day()
 	{
+	
 	}
 
-	public async Task<List<Question>> GetQuestions()
+	public int howManyCravings => Questions.Count; 
+
+    public async Task<List<Question>> GetQuestions()
 	{
 		using var stream = await FileSystem.OpenAppPackageFileAsync("questions.json");
 		using var reader = new StreamReader(stream);
@@ -19,5 +24,7 @@ public class Day
 
 		return questions; 
 	}
+
+	
 }
 
