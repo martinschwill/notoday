@@ -87,10 +87,15 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _items[index],
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  Flexible(
+                    child: Text(
+                      _items[index],
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      softWrap: true, // Allow text to wrap,
+                      overflow: TextOverflow.visible, // Show overflow text
+                    ),
                   ),
+                  
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () => _onPlusButtonPressed(index),
