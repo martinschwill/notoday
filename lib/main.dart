@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'list_of_symptoms.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Notoday',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreenAccent),
       ),
       home: const MyHomePage(title: 'Notoday'),
     );
@@ -54,18 +55,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<String> _items = ['Row 1', 'Row 2', 'Row 3'];
+  final List<String> _items = symptoms; // List of symptoms
+  final Set<int> _selectedRows = {}; // Set to keep track of selected rows
 
   void _onPlusButtonPressed(int index) {
-     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      print('Plus button pressed for row $index');
+        setState(() {
+      // Toggle the selection state of the row
+      if (_selectedRows.contains(index)) {
+        _selectedRows.remove(index); // Deselect if already selected
+      } else {
+        _selectedRows.add(index); // Select if not selected
+      }
     });
-    // Handle the plus button press for the row at index
   }
 
   @override
@@ -73,26 +74,30 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        backgroundColor: Colors.lightGreenAccent, // Set a custom color for the AppBar
       ),
       body: ListView.builder(
         itemCount: _items.length,
         itemBuilder: (context, index) {
+          final isSelected = _selectedRows.contains(index); // Check if the row is selected
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _items[index],
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _onPlusButtonPressed(index),
+            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+            child: Container(
+              color: isSelected ? Colors.yellow : Colors.transparent, // Change background color if selected
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _items[index],
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _onPlusButtonPressed(index),
                 ),
               ],
             ),
-          );
+          ));
         },
       ),
     );
