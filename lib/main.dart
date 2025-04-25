@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Notoday',
+      title: 'NOTODAY',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreenAccent),
       ),
-      home: const MyHomePage(title: 'Notoday'),
+      home: const MyHomePage(title: 'NOTODAY'),
     );
   }
 }
@@ -73,8 +73,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.lightGreenAccent, // Set a custom color for the AppBar
+        title: Text(
+          widget.title,
+          style: const TextStyle(
+            fontSize: 22.0, // Set the font size for the title
+            fontWeight: FontWeight.bold, // Set the font weight for the title
+            fontFamily: 'Courier New',
+            color: Colors.blueGrey,
+          ),
+        ),
+        backgroundColor: const Color.fromARGB(255, 185, 250, 110), // Set a custom color for the AppBar
       ),
       body: Column(
         children: [
@@ -105,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
                 padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
                 decoration: BoxDecoration(
-                    color: isSelected ? const Color.fromARGB(255, 241, 228, 110) : Colors.transparent, // Change background color if selected
+                    color: isSelected ? const Color.fromARGB(255, 247, 239, 162) : Colors.transparent, // Change background color if selected
                     borderRadius: BorderRadius.circular(10.0), // Rounded edges
                 ),
               child: Row(
@@ -155,8 +163,40 @@ class _MyHomePageState extends State<MyHomePage> {
             // Dodaj Button
             ElevatedButton(
               onPressed: () {
-                int rowsCount = _selectedRows.length;
-                print('$rowsCount selected rows added');
+                if (_selectedRows.isEmpty) {
+                  // Show a popup if no rows are selected
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Pusto...'),
+                        content: const Text('Na pewno nie chcesz nic zaznaczyć?'),
+                        actions: [
+                          // Cancel Button
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                            child: const Text('Wróć'),
+                          ),
+                          // Accept Button
+                          TextButton(
+                            onPressed: () {
+                              int rowsCount = _selectedRows.length;
+                              print('$rowsCount selected rows added'); // Execute the "else" clause
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                            child: const Text('Ok'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  // Proceed with the action if rows are selected
+                  int rowsCount = _selectedRows.length;
+                  print('$rowsCount selected rows added');
+                }
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
