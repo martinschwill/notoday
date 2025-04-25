@@ -76,7 +76,20 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         backgroundColor: Colors.lightGreenAccent, // Set a custom color for the AppBar
       ),
-      body: ListView.builder(
+      body: Column(
+        children: [
+          // Display the current date above the table
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Data: ${DateTime.now().toLocal().toString().split(' ')[0]}', // Format: YYYY-MM-DD
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+          ),
+        Expanded(child: ListView.builder(
         itemCount: _items.length,
         itemBuilder: (context, index) {
           final isSelected = _selectedRows.contains(index); // Check if the row is selected
@@ -105,6 +118,21 @@ class _MyHomePageState extends State<MyHomePage> {
           ));
         },
       ),
-    );
+      ),
+      Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () {
+                // Add your button logic here
+                print('Dodaj button pressed');
+              },
+              child: const Text('Dodaj'),
+            ),
+          ),
+        ),],
+    
+    ));
   }
 }
