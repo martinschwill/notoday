@@ -83,20 +83,31 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(16.0),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Data: ${DateTime.now().toLocal().toString().split(' ')[0]}', // Format: YYYY-MM-DD
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 142, 228, 248),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Text(
+                  'Data: ${DateTime.now().toLocal().toString().split(' ')[0]}', // Format: YYYY-MM-DD
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
             ),
+            ), 
           ),
         Expanded(child: ListView.builder(
         itemCount: _items.length,
         itemBuilder: (context, index) {
           final isSelected = _selectedRows.contains(index); // Check if the row is selected
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+            padding: const EdgeInsets.fromLTRB(60.0, 10.0, 40.0, 10.0),
             child: Container(
-              color: isSelected ? Colors.yellow : Colors.transparent, // Change background color if selected
+                padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+                decoration: BoxDecoration(
+                    color: isSelected ? const Color.fromARGB(255, 241, 228, 110) : Colors.transparent, // Change background color if selected
+                    borderRadius: BorderRadius.circular(10.0), // Rounded edges
+                ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -125,9 +136,17 @@ class _MyHomePageState extends State<MyHomePage> {
             alignment: Alignment.centerRight,
             child: ElevatedButton(
               onPressed: () {
-                // Add your button logic here
-                print('Dodaj button pressed');
+                // Add your button logic here 
+                int rowsCount = _selectedRows.length; 
+                print('$rowsCount selected rows added');
               },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
+                textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
+                ),
+              ),
               child: const Text('Dodaj'),
             ),
           ),
