@@ -196,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             // Dodaj Button
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_selectedRows.isEmpty) {
                   // Show a popup if no rows are selected
                   showDialog(
@@ -215,21 +215,66 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           // Accept Button
                           TextButton(
-                            onPressed: () {
-                              int rowsCount = _selectedRows.length;
-                              print('$rowsCount selected rows added'); // Execute the "else" clause
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                            child: const Text('Ok'),
+                            onPressed: () async {
+                                // Prepare the payload with an empty list of symptoms
+                                final Map<String, dynamic> payload = {
+                                  "symptoms": [], // Empty list of symptoms
+                                  "date": DateTime.now().toLocal().toString().split(' ')[0], // Format: YYYY-MM-DD
+                                };
+                                final int userId = 1; // Replace with the actual userId
+
+                                try {
+                                  // Send the POST request
+                                  final response = await http.post(
+                                    Uri.parse('http://192.168.33.12:5001/list/$userId'),
+                                    headers: {"Content-Type": "application/json"},
+                                    body: json.encode(payload),
+                                  );
+
+                                  if (response.statusCode == 200) {
+                                    print('Empty data successfully sent: ${response.body}');
+                                  } else {
+                                    print('Failed to send empty data: ${response.statusCode}');
+                                  }
+                                } catch (e) {
+                                  print('Error sending empty data: $e');
+                                }
+
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: const Text('Ok'),
                           ),
                         ],
                       );
                     },
                   );
                 } else {
-                  // Proceed with the action if rows are selected
-                  int rowsCount = _selectedRows.length;
-                  print('$rowsCount selected rows added');
+                 // Prepare the payload
+                  final List<Map<String, dynamic>> selectedSymptoms = _selectedRows.map((index) {
+                    return {"id": index + 1, "name": _items[index]}; // Map selected rows to symptoms
+                  }).toList();
+
+                  final Map<String, dynamic> payload = {
+                    "symptoms": selectedSymptoms,
+                    "date": DateTime.now().toLocal().toString().split(' ')[0], // Format: YYYY-MM-DD
+                  };
+                  final int userId = 1; // Replace with the actual userId
+                  try {
+                    // Send the POST request
+                    final response = await http.post(
+                      Uri.parse('http://192.168.33.12:5001/list/$userId'), 
+                      headers: {"Content-Type": "application/json"},
+                      body: json.encode(payload),
+                    );
+
+                    if (response.statusCode == 200) {
+                      print('Data successfully sent: ${response.body}');
+                    } else {
+                      print('Failed to send data: ${response.statusCode}');
+                    }
+                  } catch (e) {
+                    print('Error sending data: $e');
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(
