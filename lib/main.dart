@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 142, 228, 248),
+                  color: const Color.fromARGB(255, 226, 234, 236),
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Text(
@@ -131,13 +131,31 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       ),
       Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
+        padding: const EdgeInsets.all(32.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align buttons on opposite sides
+          children: [
+            // Clear Button
+            ElevatedButton(
               onPressed: () {
-                // Add your button logic here 
-                int rowsCount = _selectedRows.length; 
+                setState(() {
+                  _selectedRows.clear(); // Clear all selected rows
+                });
+                print('All selected rows cleared');
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
+                textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
+                ),
+              ),
+              child: const Text('Usuń'),
+            ),
+            // Dodaj Button
+            ElevatedButton(
+              onPressed: () {
+                int rowsCount = _selectedRows.length;
                 print('$rowsCount selected rows added');
               },
               style: ElevatedButton.styleFrom(
@@ -149,8 +167,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: const Text('Dodaj'),
             ),
-          ),
-        ),],
+          ],
+        ),
+      ),]
     
     ));
   }
