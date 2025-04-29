@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'config.dart';
 
 class DailyPage extends StatefulWidget {
   final int userId; // Pass the user ID to this page
@@ -18,7 +19,7 @@ class _DailyPageState extends State<DailyPage> {
 
   Future<void> _fetchSymptoms() async {
     try {
-      final response = await http.get(Uri.parse('http://10.2.40.116:5001/symptoms'));
+      final response = await http.get(Uri.parse('$baseUrl/symptoms'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -183,7 +184,7 @@ class _DailyPageState extends State<DailyPage> {
                                 try {
                                   // Send the POST request
                                   final response = await http.post(
-                                    Uri.parse('http://192.168.33.12:5001/list/$userId'),
+                                    Uri.parse('$baseUrl/list/$userId'),
                                     headers: {"Content-Type": "application/json"},
                                     body: json.encode(payload),
                                   );
@@ -219,7 +220,7 @@ class _DailyPageState extends State<DailyPage> {
                   try {
                     // Send the POST request
                     final response = await http.post(
-                      Uri.parse('http://192.168.33.12:5001/list/$userId'), 
+                      Uri.parse('$baseUrl/list/$userId'), 
                       headers: {"Content-Type": "application/json"},
                       body: json.encode(payload),
                     );

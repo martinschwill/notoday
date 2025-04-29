@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'daily.dart';
 import 'login.dart'; // Import the file where LoginPage is defined
+import 'config.dart';
 
 class HomePage extends StatefulWidget {
   final int userId;
@@ -19,7 +20,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchDaysSinceSober() async {
     try {
-      final response = await http.get(Uri.parse('http://10.2.40.116:5001/users/${widget.userId}/days_since_sober'));
+      final response = await http.get(Uri.parse('$baseUrl/users/${widget.userId}/days_since_sober'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {

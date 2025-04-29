@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'home.dart';
+import 'config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
       try {
         // Send login credentials to the backend
         final response = await http.post(
-          Uri.parse('http://10.2.40.116:5001/login'), // Replace with your backend URL
+          Uri.parse('$baseUrl/login'), // Replace with your backend URL
           headers: {"Content-Type": "application/json"},
           body: json.encode({
             "user_name": userName,
@@ -66,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('NOTODAY'),
         backgroundColor: const Color.fromARGB(255, 185, 250, 110),
       ),
       body: Padding(
