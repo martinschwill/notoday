@@ -44,16 +44,16 @@ class _LoginPageState extends State<LoginPage> {
               ),
             );
           } else {
-            _showError('Invalid credentials');
+            _showError('Niepoprawne dane logowania');
           }
         } else {
-          _showError('Failed to login: ${response.statusCode}');
+          _showError('Nieudane logowanie: ${response.statusCode}');
         }
       } catch (e) {
         _showError('Error: $e');
       }
     } else {
-      _showError('Please enter both username and password');
+      _showError('Proszę wpisz oba username i hasło');
     }
   }
 
@@ -67,7 +67,14 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NOTODAY'),
+        title: const Text('NOTODAY',
+        style: TextStyle(
+            fontSize: 22.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Courier New',
+            color: Colors.blueGrey,
+          ),),
+        
         backgroundColor: const Color.fromARGB(255, 185, 250, 110),
       ),
       body: Padding(
@@ -76,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Login',
+              'Logowanie',
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20.0),
@@ -95,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
               obscureText: true, // Hide the password input
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Password',
+                labelText: 'Hasło',
               ),
             ),
             const SizedBox(height: 20.0),
@@ -108,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(20.0),
                 ),
               ),
-              child: const Text('Login'),
+              child: const Text('Zaloguj'),
             ),
           ],
         ),

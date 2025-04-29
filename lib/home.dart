@@ -40,80 +40,91 @@ class _HomePageState extends State<HomePage> {
     _fetchDaysSinceSober(); // Fetch the number of days when the widget is initialized
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'NOTODAY',
-          style: TextStyle(
-            fontSize: 22.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier New',
-            color: Colors.blueGrey,
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text(
+        'NOTODAY',
+        style: TextStyle(
+          fontSize: 22.0,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Courier New',
+          color: Colors.blueGrey,
+        ),
+      ),
+      backgroundColor: const Color.fromARGB(255, 185, 250, 110),
+    ),
+    body: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space content between top and bottom
+      children: [
+        // Add padding from the top for the big number and buttons
+        Padding(
+          padding: const EdgeInsets.only(top: 60.0), // Add top padding
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Display the big number
+              Center(child: Text('Witaj ${widget.userName}, tyle dni jesteś już trzeźwy:')),
+              Text(
+                '$daysSinceSober',
+                style: const TextStyle(
+                  fontSize: 80.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              const SizedBox(height: 40.0),
+              // Display the buttons
+             Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // Center the buttons
+                  children: [
+                    // Left Button
+                    ElevatedButton(
+                      onPressed: () {
+                        print('History button pressed');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                        textStyle: const TextStyle(fontSize: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                      ),
+                      child: const Text('Historia'),
+                    ),
+                    const SizedBox(width: 20.0), // Add fixed spacing between buttons
+                    // Right Button
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DailyPage(userId: widget.userId),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                        textStyle: const TextStyle(fontSize: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                      ),
+                      child: const Text('Dzienniczek'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 185, 250, 110),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Display the big number
-          Center(child: Text('Witaj ${widget.userName}, tyle dni jesteś już trzeźwy:')),
-          Text(
-            '$daysSinceSober',
-            style: const TextStyle(
-              fontSize: 80.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.blueGrey,
-            ),
-          ),
-          const SizedBox(height: 40.0),
-          // Display the buttons
-          Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Left Button
-                ElevatedButton(
-                  onPressed: () {
-                    print('Left button pressed');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                    textStyle: const TextStyle(fontSize: 18.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                  child: const Text('Left Button'),
-                ),
-                // Right Button
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DailyPage(userId: widget.userId),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                    textStyle: const TextStyle(fontSize: 18.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                  ),
-                  child: const Text('Dzienniczek'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20.0),
-          // Logout Button
-          ElevatedButton(
+        // Logout Button at the bottom
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
             onPressed: () {
               // Navigate back to the LoginPage
               Navigator.pushReplacement(
@@ -128,10 +139,11 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(20.0),
               ),
             ),
-            child: const Text('Logout'),
+            child: const Text('Wyloguj'),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }

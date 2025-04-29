@@ -59,7 +59,7 @@ class _DailyPageState extends State<DailyPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Dzienniczek',
+          'NOTODAY',
           style: TextStyle(
             fontSize: 22.0,
             fontWeight: FontWeight.bold,
