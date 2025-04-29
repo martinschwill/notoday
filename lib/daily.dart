@@ -15,6 +15,7 @@ class DailyPage extends StatefulWidget {
 class _DailyPageState extends State<DailyPage> {
   final List<String> _items = []; // List to store symptoms
   final Set<int> _selectedRows = {}; // Set to keep track of selected rows
+  final String date = DateTime.now().toLocal().toString().split(' ')[0]; // Format: YYYY-MM-DD
   bool _isLoading = true; // Flag to track loading state
 
   Future<void> _fetchSymptoms() async {
@@ -37,6 +38,50 @@ class _DailyPageState extends State<DailyPage> {
     }
   }
 
+  Future<void> _checkDateUserPair() async {
+    final Map<String, dynamic> payload = {
+          "user_id": widget.userId,
+          "date": date, // Format: YYYY-MM-DD
+    };
+    try {
+        // Send the POST request
+        final response = await http.post(
+          Uri.parse('$baseUrl/days/check'),
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(payload)
+          );
+      print(payload); 
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(data) ; 
+        if (data['exists']) {
+          // If the user has already submitted data for today, show a message
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Dziś już wysłano'),
+                content: const Text('Dzisiaj już wypełniałeś dzienniczek!'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
+        print('Failed to check date-user pair');
+      }
+    } catch (e) {
+      print('Error checking date-user pair: $e');
+    }
+  }
+
   void _onPlusButtonPressed(int index) {
     setState(() {
       // Toggle the selection state of the row
@@ -52,6 +97,7 @@ class _DailyPageState extends State<DailyPage> {
   void initState() {
     super.initState();
     _fetchSymptoms(); // Fetch symptoms when the widget is initialized
+    _checkDateUserPair(); // Check if the user has already submitted data for today
   }
 
   @override
@@ -87,7 +133,7 @@ class _DailyPageState extends State<DailyPage> {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        'Data: ${DateTime.now().toLocal().toString().split(' ')[0]}',
+                        'Data: $date',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -156,12 +202,13 @@ class _DailyPageState extends State<DailyPage> {
             ElevatedButton(
               onPressed: () async {
                 if (_selectedRows.isEmpty) {
+                  
                   // Show a popup if no rows are selected
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Pusto...'),
+                        title: const Text('Wysyłam...'),
                         content: const Text('Na pewno nie chcesz nic zaznaczyć?'),
                         actions: [
                           // Cancel Button
@@ -172,25 +219,27 @@ class _DailyPageState extends State<DailyPage> {
                             child: const Text('Wróć'),
                           ),
                           // Accept Button
-                          TextButton(
+                          TextButton(             
                             onPressed: () async {
+                                
                                 // Prepare the payload with an empty list of symptoms
+                                final int userId = widget.userId; 
                                 final Map<String, dynamic> payload = {
-                                  "symptoms": [], // Empty list of symptoms
-                                  "date": DateTime.now().toLocal().toString().split(' ')[0], // Format: YYYY-MM-DD
-                                };
-                                final int userId = 1; // Replace with the actual userId
 
+                                  "user_id": userId,
+                                  "symptoms": [], // Empty list of symptoms
+                                  "date": date, // Format: YYYY-MM-DD
+                                };
                                 try {
                                   // Send the POST request
-                                  final response = await http.post(
-                                    Uri.parse('$baseUrl/list/$userId'),
+                                  final response = await http.put(
+                                    Uri.parse('$baseUrl/days'),
                                     headers: {"Content-Type": "application/json"},
                                     body: json.encode(payload),
                                   );
-
                                   if (response.statusCode == 200) {
                                     print('Empty data successfully sent: ${response.body}');
+                                    
                                   } else {
                                     print('Failed to send empty data: ${response.statusCode}');
                                   }
@@ -204,6 +253,7 @@ class _DailyPageState extends State<DailyPage> {
                           ),
                         ],
                       );
+                      
                     },
                   );
                 } else {
@@ -211,22 +261,39 @@ class _DailyPageState extends State<DailyPage> {
                   final List<Map<String, dynamic>> selectedSymptoms = _selectedRows.map((index) {
                     return {"id": index + 1, "name": _items[index]}; // Map selected rows to symptoms
                   }).toList();
-
+                  final int userId = widget.userId; 
                   final Map<String, dynamic> payload = {
+                    "user_id": userId,
                     "symptoms": selectedSymptoms,
-                    "date": DateTime.now().toLocal().toString().split(' ')[0], // Format: YYYY-MM-DD
+                    "date": date, // Format: YYYY-MM-DD
                   };
-                  final int userId = 1; // Replace with the actual userId
                   try {
                     // Send the POST request
-                    final response = await http.post(
-                      Uri.parse('$baseUrl/list/$userId'), 
+                    final response = await http.put(
+                      Uri.parse('$baseUrl/days'), 
                       headers: {"Content-Type": "application/json"},
                       body: json.encode(payload),
                     );
 
                     if (response.statusCode == 200) {
                       print('Data successfully sent: ${response.body}');
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Dzień zapisany'),
+                              content: const Text('Dane na dzisiaj zostały zapisane!'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close the dialog
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                      );
                     } else {
                       print('Failed to send data: ${response.statusCode}');
                     }
