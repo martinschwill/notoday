@@ -17,6 +17,7 @@ class _DailyPageState extends State<DailyPage> {
   final Set<int> _selectedRows = {}; // Set to keep track of selected rows
   final String date = DateTime.now().toLocal().toString().split(' ')[0]; // Format: YYYY-MM-DD
   bool _isLoading = true; // Flag to track loading state
+  final bool _wasFilled = false; 
 
   Future<void> _fetchSymptoms() async {
     try {
@@ -231,17 +232,32 @@ class _DailyPageState extends State<DailyPage> {
                                   "date": date, // Format: YYYY-MM-DD
                                 };
                                 try {
-                                  // Send the POST request
-                                  final response = await http.put(
+                                
+                                  // Send the PUT request
+                                  if (_wasFilled) {
+                                    final response = await http.put(
                                     Uri.parse('$baseUrl/days'),
                                     headers: {"Content-Type": "application/json"},
                                     body: json.encode(payload),
-                                  );
-                                  if (response.statusCode == 200) {
-                                    print('Empty data successfully sent: ${response.body}');
+                                    );
+                                    if (response.statusCode == 200) {
+                                      print('Empty data successfully sent: ${response.body}');
                                     
-                                  } else {
-                                    print('Failed to send empty data: ${response.statusCode}');
+                                    } else {
+                                      print('Failed to send empty data: ${response.statusCode}');
+                                    }
+                                  }else{ // Send a POST request if the user has not filled the form before
+                                    final response = await http.post(
+                                    Uri.parse('$baseUrl/days'),
+                                    headers: {"Content-Type": "application/json"},
+                                    body: json.encode(payload),
+                                    );
+                                    if (response.statusCode == 200) {
+                                      print('Empty data successfully sent: ${response.body}');
+                                    
+                                    } else {
+                                      print('Failed to send empty data: ${response.statusCode}');
+                                    }
                                   }
                                 } catch (e) {
                                   print('Error sending empty data: $e');
@@ -268,7 +284,8 @@ class _DailyPageState extends State<DailyPage> {
                     "date": date, // Format: YYYY-MM-DD
                   };
                   try {
-                    // Send the POST request
+                    if(_wasFilled){
+                               // Send the PUT request
                     final response = await http.put(
                       Uri.parse('$baseUrl/days'), 
                       headers: {"Content-Type": "application/json"},
@@ -296,7 +313,40 @@ class _DailyPageState extends State<DailyPage> {
                       );
                     } else {
                       print('Failed to send data: ${response.statusCode}');
+                      print(response.body);
                     }
+                  }else{
+                             // Send the POST request
+                    final response = await http.post(
+                      Uri.parse('$baseUrl/days'), 
+                      headers: {"Content-Type": "application/json"},
+                      body: json.encode(payload),
+                    );
+
+                    if (response.statusCode == 200 || response.statusCode == 201) {
+                      print('Data successfully sent: ${response.body}');
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Dzień zapisany'),
+                              content: const Text('Dane na dzisiaj zostały zapisane!'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close the dialog
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                      );
+                    } else {
+                      print('Failed to send data: ${response.statusCode}');
+                      print(response.body);
+                    }
+                  }
                   } catch (e) {
                     print('Error sending data: $e');
                   }
