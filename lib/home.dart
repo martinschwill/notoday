@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'daily.dart';
 import 'login.dart'; // Import the file where LoginPage is defined
 import 'config.dart';
+import 'emo.dart'; 
 
 class HomePage extends StatefulWidget {
   final int userId;
@@ -166,50 +167,69 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 40.0),
                 // Display the buttons
                 Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Center the buttons
-                    children: [
-                      // Left Button
-                      ElevatedButton(
-                        onPressed: () {
-                          print('History button pressed');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                          textStyle: const TextStyle(fontSize: 18.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
+                padding: const EdgeInsets.all(32.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // Center the buttons
+                  children: [
+                    // Left Button: Historia
+                    ElevatedButton(
+                      onPressed: () {
+                        print('History button pressed');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                        textStyle: const TextStyle(fontSize: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
                         ),
-                        child: const Text('Historia'),
                       ),
-                      const SizedBox(width: 20.0), // Add fixed spacing between buttons
-                      // Right Button
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DailyPage(userId: widget.userId),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                          textStyle: const TextStyle(fontSize: 18.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
+                      child: const Text('Historia'),
+                    ),
+                    const SizedBox(width: 20.0), // Add spacing between buttons
+
+                    // Middle Button: Dzienniczek
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DailyPage(userId: widget.userId),
                           ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                        textStyle: const TextStyle(fontSize: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
                         ),
-                        child: const Text('Dzienniczek'),
                       ),
-                    ],
-                  ),
+                      child: const Text('Dzienniczek'),
+                    ),
+                    const SizedBox(width: 20.0), // Add spacing between buttons
+
+                    // Right Button: Emocje
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EmoPage(userId: widget.userId),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                        textStyle: const TextStyle(fontSize: 18.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                      ),
+                      child: const Text('Emocje'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
           // Logout Button at the bottom
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -231,7 +251,7 @@ class _HomePageState extends State<HomePage> {
               child: const Text('Wyloguj'),
             ),
           ),
-        ],
+        ],),),]
       ),
     );
   }
