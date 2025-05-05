@@ -16,6 +16,7 @@ class _DailyPageState extends State<DailyPage> {
   final List<String> _items = []; // List to store symptoms
   final Set<int> _selectedRows = {}; // Set to keep track of selected rows
   final String date = DateTime.now().toLocal().toString().split(' ')[0]; // Format: YYYY-MM-DD
+  // final String date = '2025-05-03';
   bool _isLoading = true; // Flag to track loading state
   bool _wasFilled = false; 
 
@@ -51,11 +52,9 @@ class _DailyPageState extends State<DailyPage> {
           headers: {"Content-Type": "application/json"},
           body: json.encode(payload)
           );
-      print(payload); 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _wasFilled = data['exists']; // Check if the user has already submitted data for today
-        print(data) ; 
         if (data['exists']) {
           // If the user has already submitted data for today, show a message
           showDialog(

@@ -14,8 +14,10 @@ class EmoPage extends StatefulWidget {
 
 class _EmoPageState extends State<EmoPage> {
   final List<String> _emotions = []; // List to store emotions
+  List<Map<String, dynamic>> _emotionsData = []; // List to store emotions data
   final Set<int> _selectedRows = {}; // Set to keep track of selected rows
   final String date = DateTime.now().toLocal().toString().split(' ')[0]; // Format: YYYY-MM-DD
+  // final String date = '2025-05-03';
   bool _isLoading = true; // Flag to track loading state
   bool _wasFilled = false; // Flag to check if data was already submitted
 
@@ -24,10 +26,14 @@ class _EmoPageState extends State<EmoPage> {
       final response = await http.get(Uri.parse('$baseUrl/emo'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        print(data) ; // Print the fetched data for debugging
+
+        // Explicitly cast the data to List<Map<String, dynamic>>
+        final List<Map<String, dynamic>> emotionsData = List<Map<String, dynamic>>.from(data);
+        
         setState(() {
+          _emotionsData = emotionsData; // Store the fetched data
           _emotions.clear(); // Clear the list before adding new items
-          _emotions.addAll(data.map((item) => item['name'] as String).toList());
+          _emotions.addAll(_emotionsData.map((item) => item['name'] as String).toList());
           _isLoading = false; // Set loading to false after fetching data
         });
       } else {
@@ -155,15 +161,27 @@ class _EmoPageState extends State<EmoPage> {
                         return;
                       }
 
-                      final selectedEmotions =
-                          _selectedRows.map((index) => _emotions[index]).toList();
+                        final List<Map<String, dynamic>> selectedEmotions = _selectedRows.map((index) {
+                          final emotionName = _emotions[index];
+                          // Find the corresponding emotion object from the fetched data
+                          final emotionData = _emotionsData.firstWhere(
+                            (item) => item['name'] == emotionName,
+                            orElse: () => {"sign": "unknown"}, // Default to "unknown" if not found
+                          );
+                          return {
+                            "id": index + 1,
+                            "name": emotionName,
+                            "sign": emotionData["sign"], // Add the "sign" field
+                          };
+                        }).toList();
+
+                      
 
                       final payload = {
                         "user_id": widget.userId,
                         "date": date,
                         "emotions": selectedEmotions,
                       };
-
                       try {
                         if(_wasFilled){
                           final response = await http.put(
