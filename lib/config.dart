@@ -1,1 +1,1 @@
-const String baseUrl = 'http://10.2.40.138:5001'; // Replace with your current IP
+const String baseUrl = 'http://34.27.80.19'; // Replace with your current IP
