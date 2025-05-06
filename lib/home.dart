@@ -78,6 +78,8 @@ class _HomePageState extends State<HomePage> {
   void _showDatePickerPopup() {
     DateTime selectedDate = DateTime.now(); // Default to the current date
 
+    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -112,6 +114,59 @@ class _HomePageState extends State<HomePage> {
                     headers: {'Content-Type': 'application/json'},
                     body: json.encode({
                       "last_date_sober": date,
+                    }),
+                  ).then((response) {
+                    if (response.statusCode == 200) {
+                      print('Date updated successfully');
+                    } else {
+                      print('Failed to update date');
+                    }
+                  });
+                });
+                Navigator.of(context).pop(); // Close the date picker popup
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Kiedy wpadłeś?'),
+          content: SizedBox(
+            width: double.maxFinite, // Ensure the dialog has enough width
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // Wrap content vertically
+              children: [
+                CalendarDatePicker(
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                  onDateChanged: (DateTime newDate) {
+                    selectedDate = newDate; // Update the selected date
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  date = "${selectedDate.toLocal()}".split(' ')[0]; // Save the date in YYYY-MM-DD format
+                  daysSinceSober = DateTime.now().difference(selectedDate).inDays; // Update the big number
+
+                  // Update the database with the new date
+                  http.post(
+                    Uri.parse('$baseUrl/users/slipup'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: json.encode({
+                      "slipup_date": date,
+                      "user_id": widget.userId,
                     }),
                   ).then((response) {
                     if (response.statusCode == 200) {
