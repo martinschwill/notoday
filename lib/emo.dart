@@ -52,15 +52,37 @@ class _EmoPageState extends State<EmoPage> {
       "date": date,
     };
     try {
-      final response = await http.post(Uri.parse('$baseUrl/days_emo/check'), 
+        // Send the POST request
+        final response = await http.post(
+          Uri.parse('$baseUrl/days_emo/check'),
           headers: {"Content-Type": "application/json"},
-          body: json.encode(payload));
+          body: json.encode(payload)
+          );
       if (response.statusCode == 200) {
-        setState(() {
-          _wasFilled = true; // Mark as already filled
-        });
+        final data = json.decode(response.body);
+        _wasFilled = data['exists']; // Check if the user has already submitted data for today
+        if (data['exists']) {
+          // If the user has already submitted data for today, show a message
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Dzisiaj już wypełniałeś dzienniczek!'),
+                // content: const Text('Dzisiaj już wypełniałeś dzienniczek!'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       } else {
-        _wasFilled = false; // Not filled yet
+        print('Failed to check date-user pair');
       }
     } catch (e) {
       print('Error checking date-user pair: $e');
@@ -113,124 +135,195 @@ class _EmoPageState extends State<EmoPage> {
                     ),
                   ),
                 ),
-                // Display the emotions table
                 Expanded(
                   child: ListView.builder(
                     itemCount: _emotions.length,
                     itemBuilder: (context, index) {
                       final emotion = _emotions[index];
                       final isSelected = _selectedRows.contains(index);
-
-                      return Center(
-                        child: ListTile(
-                          title: Center(
-                          child: Text(
-                            emotion,
-                            style: const TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.black,)
-                          ),),
-                        tileColor: isSelected
-                            ? const Color.fromARGB(255, 231, 236, 143)
-                            : null,
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              _selectedRows.remove(index);
-                            } else {
-                              _selectedRows.add(index);
-                            }
-                          });
-                        },)
-                        
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(60.0, 10.0, 40.0, 10.0),
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color.fromARGB(255, 247, 239, 162)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  _emotions[index],
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                  softWrap: true,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedRows.remove(index);
+                                    } else {
+                                      _selectedRows.add(index);
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
                 ),
+                // Display the emotions table
+                // Expanded(
+                //   child: ListView.builder(
+                //     itemCount: _emotions.length,
+                //     itemBuilder: (context, index) {
+                //       final emotion = _emotions[index];
+                //       final isSelected = _selectedRows.contains(index);
+
+                //       return Center(
+                //         child: ListTile(
+                //           title: Center(
+                //           child: Text(
+                //             emotion,
+                //             style: const TextStyle(
+                //               fontSize: 16.0,
+                //               color: Colors.black,)
+                //           ),),
+                //         tileColor: isSelected
+                //             ? const Color.fromARGB(255, 231, 236, 143)
+                //             : null,
+                //         onTap: () {
+                //           setState(() {
+                //             if (isSelected) {
+                //               _selectedRows.remove(index);
+                //             } else {
+                //               _selectedRows.add(index);
+                //             }
+                //           });
+                //         },)
+                        
+                //       );
+                //     },
+                //   ),
+                // ),
                 // Submit button
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_selectedRows.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Proszę wybierz przynajmniej jedną emocję'),
+                  padding: const EdgeInsets.all(32.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedRows.clear(); // Clear all selected rows
+                          });
+                          print('All selected rows cleared');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
+                          textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
                           ),
-                        );
-                        return;
-                      }
-
-                        final List<Map<String, dynamic>> selectedEmotions = _selectedRows.map((index) {
-                          final emotionName = _emotions[index];
-                          // Find the corresponding emotion object from the fetched data
-                          final emotionData = _emotionsData.firstWhere(
-                            (item) => item['name'] == emotionName,
-                            orElse: () => {"sign": "unknown"}, // Default to "unknown" if not found
-                          );
-                          return {
-                            "id": index + 1,
-                            "name": emotionName,
-                            "sign": emotionData["sign"], // Add the "sign" field
-                          };
-                        }).toList();
-
-                      
-
-                      final payload = {
-                        "user_id": widget.userId,
-                        "date": date,
-                        "emotions": selectedEmotions,
-                      };
-                      try {
-                        if(_wasFilled){
-                          final response = await http.put(
-                            Uri.parse('$baseUrl/days_emo'),
-                            headers: {"Content-Type": "application/json"},
-                            body: json.encode(payload),
-                          );
-                          if (response.statusCode == 200 || response.statusCode == 201) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Dane zostały zapisane pomyślnie!'),
-                            ),
-                          );
-                        } else {
-                          print('Failed to submit emotions: ${response.statusCode}');
-                        }
-                        }else{final response = await http.post(
-                          Uri.parse('$baseUrl/days_emo'),
-                          headers: {"Content-Type": "application/json"},
-                          body: json.encode(payload),
-                        );
-                        if (response.statusCode == 200 || response.statusCode == 201) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Dane zostały zapisane pomyślnie!'),
-                            ),
-                          );
-                        } else {
-                          print('Failed to submit emotions: ${response.statusCode}');
-                        }
-                        }
-                        
-                           } catch (e) {
-                        print('Error submitting emotions: $e');
-                      }
-                    },
-
-                        
-                   
-                    
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                      textStyle: const TextStyle(fontSize: 18.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        child: const Text('Usuń'),
                       ),
-                    ),
-                    child: const Text('Zapisz'),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (_selectedRows.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Proszę wybierz przynajmniej jedną emocję'),
+                              ),
+                            );
+                            return;
+                          }
+
+                            final List<Map<String, dynamic>> selectedEmotions = _selectedRows.map((index) {
+                              final emotionName = _emotions[index];
+                              // Find the corresponding emotion object from the fetched data
+                              final emotionData = _emotionsData.firstWhere(
+                                (item) => item['name'] == emotionName,
+                                orElse: () => {"sign": "unknown"}, // Default to "unknown" if not found
+                              );
+                              return {
+                                "id": index + 1,
+                                "name": emotionName,
+                                "sign": emotionData["sign"], // Add the "sign" field
+                              };
+                            }).toList();
+
+                                                
+
+                          final payload = {
+                            "user_id": widget.userId,
+                            "date": date,
+                            "emotions": selectedEmotions,
+                          };
+                          try {
+                            if(_wasFilled){
+                              final response = await http.put(
+                                Uri.parse('$baseUrl/days_emo'),
+                                headers: {"Content-Type": "application/json"},
+                                body: json.encode(payload),
+                              );
+                              if (response.statusCode == 200 || response.statusCode == 201) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Dane zostały zapisane pomyślnie!'),
+                                ),
+                              );
+                            } else {
+                              print('Failed to submit emotions: ${response.statusCode}');
+                            }
+                            }else{final response = await http.post(
+                              Uri.parse('$baseUrl/days_emo'),
+                              headers: {"Content-Type": "application/json"},
+                              body: json.encode(payload),
+                            );
+                            if (response.statusCode == 200 || response.statusCode == 201) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Dane zostały zapisane pomyślnie!'),
+                                ),
+                              );
+                            } else {
+                              print('Failed to submit emotions: ${response.statusCode}');
+                            }
+                            }
+                            
+                              } catch (e) {
+                            print('Error submitting emotions: $e');
+                          }
+                        },
+
+                            
+                      
+                        
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                          textStyle: const TextStyle(fontSize: 18.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                        child: const Text('Zapisz'),
                   ),
+                    ]
+                  )
+                  
+                  
+                  
+                  
                 ),
               ],
             ),

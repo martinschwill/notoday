@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:notoday/reminder.dart';
 import 'daily.dart';
 import 'login.dart'; // Import the file where LoginPage is defined
 import 'config.dart';
@@ -206,7 +207,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           // Add padding from the top for the big number and buttons
           Padding(
-            padding: const EdgeInsets.only(top: 60.0), // Add top padding
+            padding: const EdgeInsets.only(top: 80.0), // Add top padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -226,7 +227,7 @@ class _HomePageState extends State<HomePage> {
                   style: const TextStyle(
                     fontSize: 80.0,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
+                    color: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 40.0),
@@ -297,6 +298,27 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     child: const Text('Historia'),
+                  ),
+                  const SizedBox(height: 20.0), // Add vertical spacing between buttons
+
+                  // Button: Przypomnij
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReminderPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      textStyle: const TextStyle(fontSize: 18.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                    ),
+                    child: const Text('Przypomnij'),
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 

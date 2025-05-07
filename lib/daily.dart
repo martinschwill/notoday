@@ -61,8 +61,8 @@ class _DailyPageState extends State<DailyPage> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: const Text('Dziś już wysłano'),
-                content: const Text('Dzisiaj już wypełniałeś dzienniczek!'),
+                title: const Text('Dzisiaj już wypełniałeś dzienniczek!'),
+                // content: const Text('Dzisiaj już wypełniałeś dzienniczek!'),
                 actions: [
                   TextButton(
                     onPressed: () {
