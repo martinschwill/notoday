@@ -78,8 +78,6 @@ class _ReminderPageState extends State<ReminderPage> {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -117,7 +115,7 @@ class _ReminderPageState extends State<ReminderPage> {
             color: Colors.blueGrey,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 185, 250, 110),
+        backgroundColor: Color.fromARGB(255, 71, 0, 119),
       ),
       body: Center(
         child: Column(

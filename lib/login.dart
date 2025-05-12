@@ -58,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showError(String message) {
+    if(!mounted) return; // Check if the widget is still mounted
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
@@ -72,10 +73,10 @@ class _LoginPageState extends State<LoginPage> {
             fontSize: 22.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Courier New',
-            color: Colors.blueGrey,
+            color: Colors.grey // Set the color to grey[200],
           ),),
         
-        backgroundColor: const Color.fromARGB(255, 185, 250, 110),
+        backgroundColor: Color.fromARGB(255, 71, 0, 119),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

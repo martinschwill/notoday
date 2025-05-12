@@ -121,90 +121,90 @@ class _HistoryPageState extends State<HistoryPage> {
             fontSize: 22.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Courier New',
-            color: Colors.blueGrey,
+            color: Colors.grey,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 185, 250, 110),
+        backgroundColor: Color.fromARGB(255, 71, 0, 119),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-        : _chartData.isEmpty
-            ? const Center(
-                child: Text(
-                  'Brak danych do wyświetlenia',
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
-              )
-            : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Historia',
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20.0),
+      // body: _isLoading
+      //     ? const Center(child: CircularProgressIndicator())
+      //   : _chartData.isEmpty
+      //       ? const Center(
+      //           child: Text(
+      //             'Brak danych do wyświetlenia',
+      //             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+      //           ),
+      //         )
+      //       : Padding(
+      //           padding: const EdgeInsets.all(16.0),
+      //           child: Column(
+      //             children: [
+      //               const Text(
+      //                 'Historia',
+      //                 style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+      //               ),
+      //               const SizedBox(height: 20.0),
                     
-                    Expanded(
-                      child: charts.OrdinalComboChart(
-                        _chartData,
-                        animate: true,
+      //               Expanded(
+      //                 child: charts.OrdinalComboChart(
+      //                   _chartData,
+      //                   animate: true,
                         
-                        domainAxis: const charts.OrdinalAxisSpec(
-                          renderSpec: charts.SmallTickRendererSpec(
-                            labelRotation: 45, // Rotate labels for better readability
-                          ),
-                        ),
-                        primaryMeasureAxis: const charts.NumericAxisSpec(
-                          renderSpec: charts.NoneRenderSpec(), // Primary axis configuration
-                        ),
-                        secondaryMeasureAxis: charts.NumericAxisSpec(
-                          renderSpec: charts.NoneRenderSpec(
-                            // labelStyle: charts.TextStyleSpec(
-                            //   fontSize: 12, // Font size for secondary axis labels
-                            //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Label color
-                            // ),
-                            // lineStyle: charts.LineStyleSpec(
-                            //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Gridline color
-                            // ),
-                          ),
-                        ),
-                        defaultRenderer: charts.BarRendererConfig(
-                          groupingType: charts.BarGroupingType.grouped,
-                          strokeWidthPx: 2.0,
-                          cornerStrategy: const charts.ConstCornerStrategy(10),
+      //                   domainAxis: const charts.OrdinalAxisSpec(
+      //                     renderSpec: charts.SmallTickRendererSpec(
+      //                       labelRotation: 45, // Rotate labels for better readability
+      //                     ),
+      //                   ),
+      //                   primaryMeasureAxis: const charts.NumericAxisSpec(
+      //                     renderSpec: charts.NoneRenderSpec(), // Primary axis configuration
+      //                   ),
+      //                   secondaryMeasureAxis: charts.NumericAxisSpec(
+      //                     renderSpec: charts.NoneRenderSpec(
+      //                       // labelStyle: charts.TextStyleSpec(
+      //                       //   fontSize: 12, // Font size for secondary axis labels
+      //                       //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Label color
+      //                       // ),
+      //                       // lineStyle: charts.LineStyleSpec(
+      //                       //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Gridline color
+      //                       // ),
+      //                     ),
+      //                   ),
+      //                   defaultRenderer: charts.BarRendererConfig(
+      //                     groupingType: charts.BarGroupingType.grouped,
+      //                     strokeWidthPx: 2.0,
+      //                     cornerStrategy: const charts.ConstCornerStrategy(10),
 
-                        ),
-                        customSeriesRenderers: [
-                          charts.LineRendererConfig(
-                            customRendererId: 'secondary',
-                            includeArea: true,
-                            strokeWidthPx: 3.0,
-                            stacked: false,
-                            includePoints: true,
-                            roundEndCaps: true, 
-                            radiusPx: 5.0,
-                            areaOpacity: 0.4
-                          ),
-                        ],
-                      behaviors: [
+      //                   ),
+      //                   customSeriesRenderers: [
+      //                     charts.LineRendererConfig(
+      //                       customRendererId: 'secondary',
+      //                       includeArea: true,
+      //                       strokeWidthPx: 3.0,
+      //                       stacked: false,
+      //                       includePoints: true,
+      //                       roundEndCaps: true, 
+      //                       radiusPx: 5.0,
+      //                       areaOpacity: 0.4
+      //                     ),
+      //                   ],
+      //                 behaviors: [
 
-                        charts.SeriesLegend(
-                          position: charts.BehaviorPosition.bottom,
-                          horizontalFirst: true, 
-                          cellPadding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
-                          entryTextStyle: const charts.TextStyleSpec(
-                            color: charts.MaterialPalette.black,
-                            fontFamily: 'Courier New',
-                            fontSize: 12,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      //                   charts.SeriesLegend(
+      //                     position: charts.BehaviorPosition.bottom,
+      //                     horizontalFirst: true, 
+      //                     cellPadding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
+      //                     entryTextStyle: const charts.TextStyleSpec(
+      //                       color: charts.MaterialPalette.black,
+      //                       fontFamily: 'Courier New',
+      //                       fontSize: 12,
+      //                     ),
+      //                   )
+      //                 ],
+      //               ),
+      //             ),
+      //           ],
+      //         ),
+      //       ),
     );
   }
 }

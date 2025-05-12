@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'history.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'config.dart';
@@ -111,10 +112,10 @@ class _DailyPageState extends State<DailyPage> {
             fontSize: 22.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Courier New',
-            color: Colors.blueGrey,
+            color: Colors.grey,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 185, 250, 110),
+        backgroundColor: Color.fromARGB(255, 71, 0, 119),
       ),
       body: _isLoading
           ? const Center(
@@ -126,16 +127,35 @@ class _DailyPageState extends State<DailyPage> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 226, 234, 236),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Text(
-                        'Data: $date',
-                        style: Theme.of(context).textTheme.titleMedium,
+                    alignment: Alignment.center,
+                    child: Material(
+                      color: Colors.transparent, // Make the background transparent
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10.0), // Match the container's border radius
+                        onTap: () {
+                          // Define the action to perform on tap
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HistoryPage(userId: widget.userId),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 226, 234, 236),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Text(
+                            date,
+                            style: const TextStyle(
+                              fontSize: 24.0, // Adjust the font size as needed
+                              fontWeight: FontWeight.w300, // Optional: Make the text bold
+                              color: Colors.blueGrey, // Optional: Keep the color consistent
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

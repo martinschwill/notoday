@@ -197,17 +197,17 @@ class _HomePageState extends State<HomePage> {
             fontSize: 22.0,
             fontWeight: FontWeight.bold,
             fontFamily: 'Courier New',
-            color: Colors.blueGrey,
+            color: Colors.grey,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 185, 250, 110),
+       backgroundColor: Color.fromARGB(255, 71, 0, 119),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space content between top and bottom
         children: [
           // Add padding from the top for the big number and buttons
           Padding(
-            padding: const EdgeInsets.only(top: 80.0), // Add top padding
+            padding: const EdgeInsets.only(top: 40.0), // Add top padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -217,23 +217,49 @@ class _HomePageState extends State<HomePage> {
                     'Gratulacje, ${widget.userName}!\n Dni trzeźwości:',
                     style: const TextStyle(
                     fontSize: 24.0, // Adjust the font size as needed
-                    fontWeight: FontWeight.bold, // Optional: Make the text bold
+                    fontWeight: FontWeight.w300, // Optional: Make the text bold
                     color: Colors.blueGrey, // Optional: Keep the color consistent
                     ),
                     textAlign: TextAlign.center, // Center the text horizontally
                     )),
-                Text(
-                  '$daysSinceSober',
-                  style: const TextStyle(
-                    fontSize: 80.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
+                    const SizedBox(height: 40.0),
+                Center(
+                  child: Material(
+                    color: Colors.transparent, // Make the background transparent
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(80.0), // Match the circle shape
+                      onTap: () {
+                         Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HistoryPage(userId: widget.userId),
+                        ),
+                      );
+                      },
+                      child: Container(
+                        width: 160.0,
+                        height: 160.0,
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$daysSinceSober',
+                          style: const TextStyle(
+                            fontSize: 60.0,
+                            fontWeight: FontWeight.w200,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+              ),    
                 const SizedBox(height: 40.0),
 
             Padding(
-              padding: const EdgeInsets.all(32.0),
+              padding: const EdgeInsets.all(30.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
                 crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch buttons to full width
@@ -301,7 +327,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 
-                  // Button: Przypomnij
+                  // // Button: Przypomnij
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
