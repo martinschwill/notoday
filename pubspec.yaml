@@ -46,18 +46,29 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 flutter_icons:
   android: true
   ios: true
   image_path: "lib/assets/icon/app_icon.png" 
+  adaptive_icon_background: "#470077"        # or use an image: "lib/assets/icon/background.png"
+  adaptive_icon_foreground: "lib/assets/icon/foreground.png"
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+flutter_native_splash:
+  image: lib/assets/icon/app_icon.png
+  color: "#470077" # Match your app's background color
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: center
+
+# The "flutter_lints" package below contains a set of recommended lints to
+# encourage good coding practices. The lint set provided by the package is
+# activated in the `analysis_options.yaml` file located at the root of your
+# package. See that file for information about deactivating specific lint
+# rules and activating additional ones.
+flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

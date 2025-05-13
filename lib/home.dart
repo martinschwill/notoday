@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           // Add padding from the top for the big number and buttons
           Padding(
-            padding: const EdgeInsets.only(top: 32.0), // Add top padding
+            padding: const EdgeInsets.only(top: 22.0), // Add top padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
