@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           // Add padding from the top for the big number and buttons
           Padding(
-            padding: const EdgeInsets.only(top: 40.0), // Add top padding
+            padding: const EdgeInsets.only(top: 32.0), // Add top padding
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     textAlign: TextAlign.center, // Center the text horizontally
                     )),
-                    const SizedBox(height: 40.0),
+                    const SizedBox(height: 32.0),
                 Center(
                   child: Material(
                     color: Colors.transparent, // Make the background transparent
@@ -256,7 +256,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
               ),    
-                const SizedBox(height: 40.0),
+                const SizedBox(height: 32.0),
 
             Padding(
               padding: const EdgeInsets.all(30.0),

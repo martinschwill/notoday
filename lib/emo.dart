@@ -226,12 +226,23 @@ class _EmoPageState extends State<EmoPage> {
                       ElevatedButton(
                         onPressed: () async {
                           if (_selectedRows.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Proszę wybierz przynajmniej jedną emocję'),
-                              ),
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Na pewno odczuwasz jakąś emocję!'),
+                                  content: const Text('Proszę, wybierz przynajmniej jedną.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // Close the dialog
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
-                            return;
                           }
 
                             final List<Map<String, dynamic>> selectedEmotions = _selectedRows.map((index) {
@@ -263,10 +274,22 @@ class _EmoPageState extends State<EmoPage> {
                                 body: json.encode(payload),
                               );
                               if (response.statusCode == 200 || response.statusCode == 201) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Dane zostały zapisane pomyślnie!'),
-                                ),
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Dzień zapisany'),
+                                    content: const Text('Emocje na dzisiaj zostały zapisane!'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); // Close the dialog
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             } else {
                               print('Failed to submit emotions: ${response.statusCode}');

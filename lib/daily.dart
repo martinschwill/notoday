@@ -320,7 +320,7 @@ class _DailyPageState extends State<DailyPage> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: const Text('Dzień zapisany'),
-                                content: const Text('Dane na dzisiaj zostały zapisane!'),
+                                content: const Text('Symptomy na dzisiaj zostały zapisane!'),
                                 actions: [
                                   TextButton(
                                     onPressed: () {

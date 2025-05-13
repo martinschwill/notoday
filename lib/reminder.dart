@@ -78,6 +78,8 @@ class _ReminderPageState extends State<ReminderPage> {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime, // Add this line
+
     );
   }
 

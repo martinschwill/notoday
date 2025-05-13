@@ -15,6 +15,7 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   List<charts.Series<SymptomData, String>> _chartData = [];
+  List<charts.Series<SymptomData, String>> _chartData2 = [];
   bool _isLoading = true;
 
   @override
@@ -40,6 +41,7 @@ class _HistoryPageState extends State<HistoryPage> {
       if (data.isEmpty) {
         setState(() {
           _chartData = [];
+          _chartData2 = [];
           _isLoading = false;
         });
         return;
@@ -58,7 +60,7 @@ class _HistoryPageState extends State<HistoryPage> {
             .toList();
 
         return SymptomData(
-          date: item['date'] ?? 'Unknown',
+          date: item['date'] != null ? formatToDayMonth(item['date']) : 'Unknown',
           symptomCount: symptoms.length,
           plusEmoCount: plusEmotions.length,
           minusEmoCount: minusEmotions.length,
@@ -70,20 +72,11 @@ class _HistoryPageState extends State<HistoryPage> {
         _chartData = [
           charts.Series<SymptomData, String>(
             id: 'Objawy',
-            colorFn: (_, __) => charts.MaterialPalette.gray.shadeDefault,
+            colorFn: (_, __) => charts.MaterialPalette.teal.shadeDefault,
             domainFn: (SymptomData symptoms, _) => symptoms.date,
             measureFn: (SymptomData symptoms, _) => symptoms.symptomCount,
             data: symptomData,
           ),
-          charts.Series<SymptomData, String>(
-            id: 'Emocje +',
-            colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => symptoms.date,
-            measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
-            data: symptomData,
-          )
-           ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
-           ..setAttribute(charts.rendererIdKey, 'secondary'),
           charts.Series<SymptomData, String>(
             id: 'Emocje -',
             colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
@@ -93,6 +86,32 @@ class _HistoryPageState extends State<HistoryPage> {
           )
            ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
            ..setAttribute(charts.rendererIdKey, 'secondary'),
+          charts.Series<SymptomData, String>(
+            id: 'Emocje +',
+            colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
+            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
+            data: symptomData,
+          )
+           ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
+           ..setAttribute(charts.rendererIdKey, 'secondary'),
+        ];
+        _chartData2 = [
+          charts.Series<SymptomData, String>(
+            id: 'Emocje -',
+            colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
+            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
+            data: symptomData,
+          ),
+
+          charts.Series<SymptomData, String>(
+            id: 'Emocje +',
+            colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
+            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
+            data: symptomData,
+          )
         ];
         _isLoading = false;
       });
@@ -126,85 +145,113 @@ class _HistoryPageState extends State<HistoryPage> {
         ),
         backgroundColor: Color.fromARGB(255, 71, 0, 119),
       ),
-      // body: _isLoading
-      //     ? const Center(child: CircularProgressIndicator())
-      //   : _chartData.isEmpty
-      //       ? const Center(
-      //           child: Text(
-      //             'Brak danych do wyświetlenia',
-      //             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-      //           ),
-      //         )
-      //       : Padding(
-      //           padding: const EdgeInsets.all(16.0),
-      //           child: Column(
-      //             children: [
-      //               const Text(
-      //                 'Historia',
-      //                 style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-      //               ),
-      //               const SizedBox(height: 20.0),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+        : _chartData.isEmpty
+            ? const Center(
+                child: Text(
+                  'Brak danych do wyświetlenia',
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Historia',
+                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20.0),
                     
-      //               Expanded(
-      //                 child: charts.OrdinalComboChart(
-      //                   _chartData,
-      //                   animate: true,
+                    SizedBox(
+                      height: 280,
+                      child: charts.OrdinalComboChart(
+                        _chartData,
+                        animate: true,
                         
-      //                   domainAxis: const charts.OrdinalAxisSpec(
-      //                     renderSpec: charts.SmallTickRendererSpec(
-      //                       labelRotation: 45, // Rotate labels for better readability
-      //                     ),
-      //                   ),
-      //                   primaryMeasureAxis: const charts.NumericAxisSpec(
-      //                     renderSpec: charts.NoneRenderSpec(), // Primary axis configuration
-      //                   ),
-      //                   secondaryMeasureAxis: charts.NumericAxisSpec(
-      //                     renderSpec: charts.NoneRenderSpec(
-      //                       // labelStyle: charts.TextStyleSpec(
-      //                       //   fontSize: 12, // Font size for secondary axis labels
-      //                       //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Label color
-      //                       // ),
-      //                       // lineStyle: charts.LineStyleSpec(
-      //                       //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Gridline color
-      //                       // ),
-      //                     ),
-      //                   ),
-      //                   defaultRenderer: charts.BarRendererConfig(
-      //                     groupingType: charts.BarGroupingType.grouped,
-      //                     strokeWidthPx: 2.0,
-      //                     cornerStrategy: const charts.ConstCornerStrategy(10),
+                        domainAxis: const charts.OrdinalAxisSpec(
+                          renderSpec: charts.SmallTickRendererSpec(
+                            labelRotation: 45, // Rotate labels for better readability
+                          ),
+                        ),
+                        primaryMeasureAxis: const charts.NumericAxisSpec(
+                          renderSpec: charts.GridlineRendererSpec(),
+                        ),
+                        secondaryMeasureAxis: charts.NumericAxisSpec(
+                          renderSpec: charts.NoneRenderSpec(
+                            // labelStyle: charts.TextStyleSpec(
+                            //   fontSize: 12, // Font size for secondary axis labels
+                            //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Label color
+                            // ),
+                            // lineStyle: charts.LineStyleSpec(
+                            //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Gridline color
+                            // ),
+                          ),
+                        ),
+                        defaultRenderer: charts.BarRendererConfig(
+                          strokeWidthPx: 0.4,
+                          cornerStrategy: const charts.ConstCornerStrategy(5),
 
-      //                   ),
-      //                   customSeriesRenderers: [
-      //                     charts.LineRendererConfig(
-      //                       customRendererId: 'secondary',
-      //                       includeArea: true,
-      //                       strokeWidthPx: 3.0,
-      //                       stacked: false,
-      //                       includePoints: true,
-      //                       roundEndCaps: true, 
-      //                       radiusPx: 5.0,
-      //                       areaOpacity: 0.4
-      //                     ),
-      //                   ],
-      //                 behaviors: [
+                        ),
+                        customSeriesRenderers: [
+                          charts.LineRendererConfig(
+                            customRendererId: 'secondary',
+                            includeArea: true,
+                            strokeWidthPx: 1.0,
+                            stacked: true,
+                            includePoints: false,
+                            roundEndCaps: true, 
+                            areaOpacity: 0.2,
+                          ),
+                        ],
+                      behaviors: [
 
-      //                   charts.SeriesLegend(
-      //                     position: charts.BehaviorPosition.bottom,
-      //                     horizontalFirst: true, 
-      //                     cellPadding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
-      //                     entryTextStyle: const charts.TextStyleSpec(
-      //                       color: charts.MaterialPalette.black,
-      //                       fontFamily: 'Courier New',
-      //                       fontSize: 12,
-      //                     ),
-      //                   )
-      //                 ],
-      //               ),
-      //             ),
-      //           ],
-      //         ),
-      //       ),
+                        charts.SeriesLegend(
+                          position: charts.BehaviorPosition.top,
+                          horizontalFirst: true, 
+                          cellPadding: const EdgeInsets.only(right: 4.0, bottom: 4.0),
+                          entryTextStyle: const charts.TextStyleSpec(
+                            color: charts.MaterialPalette.black,
+        
+                            fontSize: 13,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 18.0),
+                    child: Divider(
+                      color: Colors.grey, // Line color
+                      thickness: 2,      // Line thickness
+                      height: 2,         // Space the line takes vertically
+                    ),
+                  ),
+                  SizedBox(
+                    height: 280,
+                    child: charts.BarChart(
+                      _chartData2,
+                      animate: true,
+                      barGroupingType: charts.BarGroupingType.grouped, // <-- This is important!
+                      domainAxis: const charts.OrdinalAxisSpec(
+                        renderSpec: charts.SmallTickRendererSpec(
+                          labelRotation: 45,
+                        ),
+                      ),
+                      primaryMeasureAxis: const charts.NumericAxisSpec(
+                        renderSpec: charts.GridlineRendererSpec(),
+                      ),
+                      behaviors: [
+                        charts.SeriesLegend(),
+                      ],
+                    )
+                  )
+                ],
+                
+
+              ),
+            ),
     );
   }
 }
@@ -226,4 +273,9 @@ class SymptomData {
   String toString() {
     return 'SymptomData(date: $date, symptomCount: $symptomCount, plusEmoCount: $plusEmoCount, minusEmoCount: $minusEmoCount)';
   }
+}
+
+String formatToDayMonth(String dateStr) {
+  final date = DateTime.parse(dateStr);
+  return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}';
 }
