@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart'; 
 import 'package:timezone/timezone.dart' as tz;
+import 'widgets/app_bar.dart';
 
 class ReminderPage extends StatefulWidget {
   const ReminderPage({super.key});
@@ -17,8 +20,9 @@ class _ReminderPageState extends State<ReminderPage> {
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
+    _loadSelectedTime();
     _requestPermissions();
+    _initializeNotifications();
   }
 
   void _initializeNotifications() async {
@@ -40,8 +44,9 @@ class _ReminderPageState extends State<ReminderPage> {
     );
   }
 
-  void _requestPermissions() {
-  _notificationsPlugin
+  void _requestPermissions() async {
+    // iOS
+  await _notificationsPlugin
       .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin>()
       ?.requestPermissions(
@@ -49,6 +54,30 @@ class _ReminderPageState extends State<ReminderPage> {
         badge: true,
         sound: true,
       );
+    // Android
+  if (Theme.of(context).platform == TargetPlatform.android) {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+  }
+}
+
+//Save and load selected time
+Future<void> _saveSelectedTime(TimeOfDay time) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('reminder_hour', time.hour);
+  await prefs.setInt('reminder_minute', time.minute);
+}
+
+Future<void> _loadSelectedTime() async {
+  final prefs = await SharedPreferences.getInstance();
+  final hour = prefs.getInt('reminder_hour');
+  final minute = prefs.getInt('reminder_minute');
+  if (hour != null && minute != null) {
+    setState(() {
+      _selectedTime = TimeOfDay(hour: hour, minute: minute);
+    });
+  }
 }
 
   void _scheduleNotification(TimeOfDay time) async {
@@ -90,6 +119,7 @@ class _ReminderPageState extends State<ReminderPage> {
     });
   }
 
+
   Future<void> _pickTime() async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -100,25 +130,17 @@ class _ReminderPageState extends State<ReminderPage> {
       setState(() {
         _selectedTime = pickedTime;
       });
+      _saveSelectedTime(pickedTime);
       _scheduleNotification(pickedTime);
     }
-  }
+
+}
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'NOTODAY',
-          style: TextStyle(
-            fontSize: 22.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier New',
-            color: Colors.blueGrey,
-          ),
-        ),
-        backgroundColor: Color.fromARGB(255, 71, 0, 119),
-      ),
+      appBar: const CustomAppBar(title: 'NOTODAY'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center vertically

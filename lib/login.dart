@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'home.dart';
 import 'config.dart';
+import 'widgets/app_bar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -67,17 +68,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('NOTODAY',
-        style: TextStyle(
-            fontSize: 22.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier New',
-            color: Colors.grey // Set the color to grey[200],
-          ),),
-        
-        backgroundColor: Color.fromARGB(255, 71, 0, 119),
-      ),
+      appBar: const CustomAppBar(title: 'NOTODAY'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

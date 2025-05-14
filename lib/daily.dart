@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notoday/widgets/app_bar.dart';
 import 'history.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -105,18 +106,7 @@ class _DailyPageState extends State<DailyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'NOTODAY',
-          style: TextStyle(
-            fontSize: 22.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier New',
-            color: Colors.grey,
-          ),
-        ),
-        backgroundColor: Color.fromARGB(255, 71, 0, 119),
-      ),
+      appBar: const CustomAppBar(title: 'NOTODAY'),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(),

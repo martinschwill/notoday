@@ -7,6 +7,7 @@ import 'login.dart'; // Import the file where LoginPage is defined
 import 'config.dart';
 import 'emo.dart'; 
 import 'history.dart';
+import 'widgets/app_bar.dart';
 
 class HomePage extends StatefulWidget {
   final int userId;
@@ -190,18 +191,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'NOTODAY',
-          style: TextStyle(
-            fontSize: 22.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier New',
-            color: Colors.grey,
-          ),
-        ),
-       backgroundColor: Color.fromARGB(255, 71, 0, 119),
-      ),
+      appBar: const CustomAppBar(title: 'NOTODAY'),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space content between top and bottom
         children: [
