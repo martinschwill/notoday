@@ -235,19 +235,19 @@ class _EmoPageState extends State<EmoPage> {
                             );
                           }
 
-                            final List<Map<String, dynamic>> selectedEmotions = _selectedRows.map((index) {
-                              final emotionName = _emotions[index];
-                              // Find the corresponding emotion object from the fetched data
-                              final emotionData = _emotionsData.firstWhere(
-                                (item) => item['name'] == emotionName,
-                                orElse: () => {"sign": "unknown"}, // Default to "unknown" if not found
-                              );
-                              return {
-                                "id": index + 1,
-                                "name": emotionName,
-                                "sign": emotionData["sign"], // Add the "sign" field
-                              };
-                            }).toList();
+                          final List<Map<String, dynamic>> selectedEmotions = _selectedRows.map((index) {
+                            final emotionName = _emotions[index];
+                            // Find the corresponding emotion object from the fetched data
+                            final emotionData = _emotionsData.firstWhere(
+                              (item) => item['name'] == emotionName,
+                              orElse: () => {"sign": "unknown"}, // Default to "unknown" if not found
+                            );
+                            return {
+                              "id": index + 1,
+                              "name": emotionName,
+                              "sign": emotionData["sign"], // Add the "sign" field
+                            };
+                          }).toList();
 
                                                 
 
@@ -256,15 +256,17 @@ class _EmoPageState extends State<EmoPage> {
                             "date": date,
                             "emotions": selectedEmotions,
                           };
+                          
                           try {
-                            if(_wasFilled){
+                           
                               final response = await http.put(
                                 Uri.parse('$baseUrl/days_emo'),
                                 headers: {"Content-Type": "application/json"},
                                 body: json.encode(payload),
                               );
-                              if (response.statusCode == 200 || response.statusCode == 201) {
-                              showDialog(
+                              if (response.statusCode == 200 || response.statusCode == 201 )
+                              {
+                                showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
@@ -281,27 +283,45 @@ class _EmoPageState extends State<EmoPage> {
                                   );
                                 },
                               );
-                            } else {
-                              print('Failed to submit emotions: ${response.statusCode}');
-                            }
-                            }else{final response = await http.post(
-                              Uri.parse('$baseUrl/days_emo'),
-                              headers: {"Content-Type": "application/json"},
-                              body: json.encode(payload),
+                              }else{
+                                print("Error saving emotions: ${response.statusCode}");
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Błąd'),
+                                      content: const Text('Nie udało się zapisać emocji. Spróbuj ponownie później.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop(); // Close the dialog
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                          } catch (e) {
+                            print('Error saving emotions: $e');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Błąd'),
+                                  content: const Text('Nie udało się zapisać emocji. Spróbuj ponownie później.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // Close the dialog
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
-                            if (response.statusCode == 200 || response.statusCode == 201) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Dane zostały zapisane pomyślnie!'),
-                                ),
-                              );
-                            } else {
-                              print('Failed to submit emotions: ${response.statusCode}');
-                            }
-                            }
-                            
-                              } catch (e) {
-                            print('Error submitting emotions: $e');
                           }
                         },
 

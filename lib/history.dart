@@ -17,11 +17,14 @@ class HistoryPage extends StatefulWidget {
 class _HistoryPageState extends State<HistoryPage> {
   List<charts.Series<SymptomData, String>> _chartData = [];
   List<charts.Series<SymptomData, String>> _chartData2 = [];
+  List<dynamic> _slipups = []; 
   bool _isLoading = true;
+  int _daysRange = 30; // Default to 30 days
 
   @override
   void initState() {
     super.initState();
+    _fetchUserSlipups(); 
     _fetchUserSymptoms();
   }
 
@@ -29,7 +32,7 @@ class _HistoryPageState extends State<HistoryPage> {
   try {
     final payload = json.encode({
       "user_id": widget.userId,
-      "days": 30,
+      "days": _daysRange,
     });
     final response = await http.post(
       Uri.parse('$baseUrl/days/past'),
@@ -61,27 +64,36 @@ class _HistoryPageState extends State<HistoryPage> {
             .toList();
 
         return SymptomData(
-          date: item['date'] != null ? formatToDayMonth(item['date']) : 'Unknown',
+          date: item['date'],
           symptomCount: symptoms.length,
           plusEmoCount: plusEmotions.length,
           minusEmoCount: minusEmotions.length,
         );
       }).toList();
+  
 
 
       setState(() {
         _chartData = [
           charts.Series<SymptomData, String>(
             id: 'Objawy',
-            colorFn: (_, __) => charts.MaterialPalette.teal.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            colorFn: (SymptomData symptoms, __) => _slipups.contains(symptoms.date)
+              ? charts.ColorUtil.fromDartColor(const Color.fromARGB(255, 223, 2, 2))
+              : charts.ColorUtil.fromDartColor(Colors.blueGrey),
+            labelAccessorFn: (SymptomData symptoms, __) => 
+            _slipups.contains(symptoms.date)
+              ? 'Z'
+              : '',
+            // fillColorFn: (_,__) => charts.ColorUtil.fromDartColor(Colors.black),
+            
+            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.symptomCount,
             data: symptomData,
           ),
           charts.Series<SymptomData, String>(
             id: 'Emocje -',
             colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
             data: symptomData,
           )
@@ -90,7 +102,7 @@ class _HistoryPageState extends State<HistoryPage> {
           charts.Series<SymptomData, String>(
             id: 'Emocje +',
             colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
             data: symptomData,
           )
@@ -101,7 +113,7 @@ class _HistoryPageState extends State<HistoryPage> {
           charts.Series<SymptomData, String>(
             id: 'Emocje -',
             colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
             data: symptomData,
           ),
@@ -109,7 +121,7 @@ class _HistoryPageState extends State<HistoryPage> {
           charts.Series<SymptomData, String>(
             id: 'Emocje +',
             colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => symptoms.date,
+            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
             data: symptomData,
           )
@@ -131,6 +143,28 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 }
   
+Future<void> _fetchUserSlipups() async {
+  try {
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/slipups/${widget.userId}'),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _slipups = data; 
+      });
+    } else {
+      print('Failed to fetch user slipups: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching user slipups: $e');
+
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +179,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
               )
             : Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: const EdgeInsets.only(left: 28.0, right: 28.0, top: 10.0, bottom: 20.0),
                 child: Column(
                   children: [
                     const Text(
@@ -154,8 +188,34 @@ class _HistoryPageState extends State<HistoryPage> {
                     ),
                     const SizedBox(height: 20.0),
                     
+                    //Date range slider 
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Zakres dni:'),
+                        Slider(
+                          value: _daysRange.toDouble(),
+                          min: 7,
+                          max: 60,
+                          divisions: 53,
+                          label: '$_daysRange',
+                          onChanged: (double value) {
+                            setState(() {
+                              _daysRange = value.round();
+                            });
+                          },
+                          onChangeEnd: (double value) {
+                            _fetchUserSymptoms(); // Fetch new data when user stops sliding
+                          },
+                        ),
+                        Text('$_daysRange'),
+                      ],
+                    ),
+                    const SizedBox(height: 10.0),
+
+
                     SizedBox(
-                      height: 280,
+                      height: 260,
                       child: charts.OrdinalComboChart(
                         _chartData,
                         animate: true,
@@ -182,6 +242,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         defaultRenderer: charts.BarRendererConfig(
                           strokeWidthPx: 0.4,
                           cornerStrategy: const charts.ConstCornerStrategy(5),
+                          barRendererDecorator: charts.BarLabelDecorator<String>(),
 
                         ),
                         customSeriesRenderers: [
@@ -206,7 +267,8 @@ class _HistoryPageState extends State<HistoryPage> {
         
                             fontSize: 13,
                           ),
-                        )
+                        ),
+                      
                       ],
                     ),
                   ),
@@ -219,7 +281,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     ),
                   ),
                   SizedBox(
-                    height: 280,
+                    height: 260,
                     child: charts.BarChart(
                       _chartData2,
                       animate: true,
@@ -232,6 +294,7 @@ class _HistoryPageState extends State<HistoryPage> {
                       primaryMeasureAxis: const charts.NumericAxisSpec(
                         renderSpec: charts.GridlineRendererSpec(),
                       ),
+                      
                       behaviors: [
                         charts.SeriesLegend(),
                       ],
