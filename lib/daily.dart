@@ -4,6 +4,9 @@ import 'analize.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'config.dart';
+import 'widgets/button_builder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class DailyPage extends StatefulWidget {
   final int userId; // Pass the user ID to this page
@@ -27,6 +30,8 @@ class _DailyPageState extends State<DailyPage> {
       final response = await http.get(Uri.parse('$baseUrl/symptoms'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList('symptoms_items', data.map((item) => item['name'] as String).toList());
         setState(() {
           _items.clear(); // Clear the list before adding new items
           _items.addAll(data.map((item) => item['name'] as String).toList());
@@ -85,6 +90,20 @@ class _DailyPageState extends State<DailyPage> {
     }
   }
 
+  Future<void> _fetchItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedItems = prefs.getStringList('symptoms_items');
+    if (savedItems != null && savedItems.isNotEmpty) {
+      setState(() {
+        _items.clear();
+        _items.addAll(savedItems);
+        _isLoading = false;
+      });
+    } else {
+      await _fetchSymptoms(); // Only fetch if not found in prefs
+    }
+  }
+
   void _onPlusButtonPressed(int index) {
     setState(() {
       // Toggle the selection state of the row
@@ -99,7 +118,7 @@ class _DailyPageState extends State<DailyPage> {
   @override
   void initState() {
     super.initState();
-    _fetchSymptoms(); // Fetch symptoms when the widget is initialized
+    _fetchItems(); // loads symtpoms or fetches them from the API
     _checkDateUserPair(); // Check if the user has already submitted data for today
   }
 
@@ -140,7 +159,7 @@ class _DailyPageState extends State<DailyPage> {
                           child: Text(
                             date,
                             style: const TextStyle(
-                              fontSize: 24.0, // Adjust the font size as needed
+                              fontSize: 20.0, // Adjust the font size as needed
                               fontWeight: FontWeight.w300, // Optional: Make the text bold
                               color: Colors.blueGrey, // Optional: Keep the color consistent
                             ),
@@ -192,25 +211,20 @@ class _DailyPageState extends State<DailyPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align buttons on opposite sides
           children: [
+
             // Clear Button
-            ElevatedButton(
+            CustomButton(
               onPressed: () {
                 setState(() {
                   _selectedRows.clear(); // Clear all selected rows
                 });
                 print('All selected rows cleared');
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
-                textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
-                ),
-              ),
-              child: const Text('Usuń'),
+              text: 'Usuń', 
             ),
+
             // Dodaj Button
-            ElevatedButton(
+            CustomButton(
               onPressed: () async {
                 if (_selectedRows.isEmpty) {
                   
@@ -313,17 +327,10 @@ class _DailyPageState extends State<DailyPage> {
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
-                textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
-                ),
+              text: 'Dodaj', 
               ),
-              child: const Text('Dodaj'),
-            ),
-              ],
-            ),
+          ],
+        ),
             
     )])
     );

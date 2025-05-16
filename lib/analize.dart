@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'config.dart';
 import 'widgets/app_bar.dart'; 
 import 'widgets/chart_data_builder.dart';
+import 'widgets/button_builder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AnalyzePage extends StatefulWidget {
   final int userId;
@@ -25,7 +27,7 @@ class _AnalyzePageState extends State<AnalyzePage> {
   @override
   void initState() {
     super.initState();
-    _fetchUserSlipups(); 
+    _loadUserSlipups(); 
     _fetchUserSymptoms();
   }
 
@@ -116,6 +118,18 @@ Future<void> _fetchUserSlipups() async {
   }
 }
 
+Future<void> _loadUserSlipups() async {
+  final prefs = await SharedPreferences.getInstance();
+  final slipups = prefs.getStringList('slipups'); 
+  if (slipups != null && slipups.isNotEmpty) {
+    setState(() {
+      _slipups = slipups;
+    });
+  }else{
+    await _fetchUserSlipups();
+  }
+ _isLoading = false ; 
+}
 
   @override
   Widget build(BuildContext context) {
@@ -239,9 +253,11 @@ Future<void> _fetchUserSlipups() async {
                       ],
                     )
                   ),
+                  
                   const SizedBox(height: 10.0),
-                  ElevatedButton(
-                    onPressed: () {
+
+                  CustomButton(
+                    onPressed: (){
                       showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -260,16 +276,7 @@ Future<void> _fetchUserSlipups() async {
                               },
                             );
                     },
-                    style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                          textStyle: const TextStyle(fontSize: 18.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                    ),
-                    child: const Text('Analizuj'),
-                    
-                    ),
+                    text: "Analizuj")
                     
                 ],
                 

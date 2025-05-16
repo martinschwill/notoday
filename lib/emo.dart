@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'config.dart';
 import 'widgets/app_bar.dart'; 
+import 'widgets/button_builder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmoPage extends StatefulWidget {
   final int userId; // Pass the user ID to this page
@@ -31,11 +33,17 @@ class _EmoPageState extends State<EmoPage> {
 
         // Explicitly cast the data to List<Map<String, dynamic>>
         final List<Map<String, dynamic>> emotionsData = List<Map<String, dynamic>>.from(data);
-        
+        final List<String> emotions = emotionsData.map((item) => item['name'] as String).toList();
+        final prefs = await SharedPreferences.getInstance();
+        String emotionsJson = json.encode(emotions);
+        String emotionsDataJson = json.encode(emotionsData);
+        await prefs.setString('emotions', emotionsJson); 
+        await prefs.setString('emotions_data', emotionsDataJson);
+        // Store the fetched data in the state        
         setState(() {
           _emotionsData = emotionsData; // Store the fetched data
           _emotions.clear(); // Clear the list before adding new items
-          _emotions.addAll(_emotionsData.map((item) => item['name'] as String).toList());
+          _emotions.addAll(emotions);
           _isLoading = false; // Set loading to false after fetching data
         });
       } else {
@@ -45,6 +53,24 @@ class _EmoPageState extends State<EmoPage> {
     } catch (e) {
       print('Error fetching emotions: $e');
       _isLoading = false; // Set loading to false if there's an error
+    }
+  }
+
+  Future<void> _fetchItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? savedEmotions = prefs.getString('emotions'); 
+    String? savedEmotionsData = prefs.getString('emotions_data');
+    
+    if (savedEmotions != null && savedEmotions.isNotEmpty && savedEmotionsData != null && savedEmotionsData.isNotEmpty) {
+        List<dynamic> decoded = json.decode(savedEmotions);
+      setState(() {
+        _emotionsData = List<Map<String, dynamic>>.from(json.decode(savedEmotionsData));        
+        _emotions.clear();
+        _emotions.addAll(decoded.cast<String>());
+        _isLoading = false; 
+      });
+    }else{
+      await _fetchEmotions(); // Fetch emotions if no saved items
     }
   }
 
@@ -94,7 +120,7 @@ class _EmoPageState extends State<EmoPage> {
   @override
   void initState() {
     super.initState();
-    _fetchEmotions(); // Fetch emotions when the widget is initialized
+    _fetchItems(); // Fetch emotions when the widget is initialized
     _checkDateUserPair(); // Check if the user has already submitted data for today
   }
 
@@ -135,7 +161,7 @@ class _EmoPageState extends State<EmoPage> {
                           child: Text(
                             date,
                             style: const TextStyle(
-                              fontSize: 24.0, // Adjust the font size as needed
+                              fontSize: 20.0, // Adjust the font size as needed
                               fontWeight: FontWeight.w300, // Optional: Make the text bold
                               color: Colors.blueGrey, // Optional: Keep the color consistent
                             ),
@@ -197,23 +223,18 @@ class _EmoPageState extends State<EmoPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton(
+                      
+                      CustomButton(
                         onPressed: () {
                           setState(() {
                             _selectedRows.clear(); // Clear all selected rows
                           });
                           print('All selected rows cleared');
                         },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
-                          textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
-                          ),
-                        ),
-                        child: const Text('Usuń'),
+                        text: 'Usuń',
                       ),
-                      ElevatedButton(
+                      
+                      CustomButton(
                         onPressed: () async {
                           if (_selectedRows.isEmpty) {
                             showDialog(
@@ -323,17 +344,9 @@ class _EmoPageState extends State<EmoPage> {
                               },
                             );
                           }
-                        },
-                
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                          textStyle: const TextStyle(fontSize: 18.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                        ),
-                        child: const Text('Zapisz'),
-                  ),
+                        },                        
+                        text: 'Zapisz',
+                    ),
                     ]
                   )
                   

@@ -16,7 +16,7 @@ class _ReminderPageState extends State<ReminderPage> {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   TimeOfDay? _selectedTime;
-
+  
   @override
   void initState() {
     super.initState();
@@ -155,10 +155,10 @@ Future<void> _loadSelectedTime() async {
                   Text(
                     _selectedTime == null
                         ? 'Brak przypomnienia'
-                        : 'Przypomnij o ${_selectedTime!.format(context)}',
+                        : 'Przypomnij o \n\n\n${_selectedTime!.format(context)}',
                     style: const TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 26.0,
+                      fontWeight: FontWeight.w300,
                       color: Colors.blueGrey,
                     ),
                     textAlign: TextAlign.center,
