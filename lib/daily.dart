@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notoday/widgets/app_bar.dart';
-import 'history.dart';
+import 'analize.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'config.dart';
@@ -57,7 +57,7 @@ class _DailyPageState extends State<DailyPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _wasFilled = data['exists']; // Check if the user has already submitted data for today
-        if (data['exists']) {
+        if (_wasFilled) {
           // If the user has already submitted data for today, show a message
           showDialog(
             context: context,
@@ -127,7 +127,7 @@ class _DailyPageState extends State<DailyPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HistoryPage(userId: widget.userId),
+                              builder: (context) => AnalyzePage(userId: widget.userId),
                             ),
                           );
                         },

@@ -4,17 +4,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'config.dart';
 import 'widgets/app_bar.dart'; 
+import 'widgets/chart_data_builder.dart';
 
-class HistoryPage extends StatefulWidget {
+class AnalyzePage extends StatefulWidget {
   final int userId;
 
-  const HistoryPage({super.key, required this.userId});
+  const AnalyzePage({super.key, required this.userId});
 
   @override
-  State<HistoryPage> createState() => _HistoryPageState();
+  State<AnalyzePage> createState() => _AnalyzePageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _AnalyzePageState extends State<AnalyzePage> {
   List<charts.Series<SymptomData, String>> _chartData = [];
   List<charts.Series<SymptomData, String>> _chartData2 = [];
   List<dynamic> _slipups = []; 
@@ -74,58 +75,8 @@ class _HistoryPageState extends State<HistoryPage> {
 
 
       setState(() {
-        _chartData = [
-          charts.Series<SymptomData, String>(
-            id: 'Objawy',
-            colorFn: (SymptomData symptoms, __) => _slipups.contains(symptoms.date)
-              ? charts.ColorUtil.fromDartColor(const Color.fromARGB(255, 223, 2, 2))
-              : charts.ColorUtil.fromDartColor(Colors.blueGrey),
-            labelAccessorFn: (SymptomData symptoms, __) => 
-            _slipups.contains(symptoms.date)
-              ? 'Z'
-              : '',
-            // fillColorFn: (_,__) => charts.ColorUtil.fromDartColor(Colors.black),
-            
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.symptomCount,
-            data: symptomData,
-          ),
-          charts.Series<SymptomData, String>(
-            id: 'Emocje -',
-            colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
-            data: symptomData,
-          )
-           ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
-           ..setAttribute(charts.rendererIdKey, 'secondary'),
-          charts.Series<SymptomData, String>(
-            id: 'Emocje +',
-            colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
-            data: symptomData,
-          )
-           ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
-           ..setAttribute(charts.rendererIdKey, 'secondary'),
-        ];
-        _chartData2 = [
-          charts.Series<SymptomData, String>(
-            id: 'Emocje -',
-            colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
-            data: symptomData,
-          ),
-
-          charts.Series<SymptomData, String>(
-            id: 'Emocje +',
-            colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
-            data: symptomData,
-          )
-        ];
+        _chartData = buildChartData(symptomData, _slipups, formatToDayMonth);
+        _chartData2 = buildChartData2(symptomData, formatToDayMonth);
         _isLoading = false;
       });
       
@@ -154,6 +105,7 @@ Future<void> _fetchUserSlipups() async {
       final List<dynamic> data = json.decode(response.body);
       setState(() {
         _slipups = data; 
+        print('Fetched slipups: $_slipups');
       });
     } else {
       print('Failed to fetch user slipups: ${response.statusCode}');
@@ -182,12 +134,6 @@ Future<void> _fetchUserSlipups() async {
                 padding: const EdgeInsets.only(left: 28.0, right: 28.0, top: 10.0, bottom: 20.0),
                 child: Column(
                   children: [
-                    const Text(
-                      'Historia',
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20.0),
-                    
                     //Date range slider 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -230,13 +176,6 @@ Future<void> _fetchUserSlipups() async {
                         ),
                         secondaryMeasureAxis: charts.NumericAxisSpec(
                           renderSpec: charts.NoneRenderSpec(
-                            // labelStyle: charts.TextStyleSpec(
-                            //   fontSize: 12, // Font size for secondary axis labels
-                            //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Label color
-                            // ),
-                            // lineStyle: charts.LineStyleSpec(
-                            //   color: charts.ColorUtil.fromDartColor(Colors.grey), // Gridline color
-                            // ),
                           ),
                         ),
                         defaultRenderer: charts.BarRendererConfig(
@@ -299,32 +238,45 @@ Future<void> _fetchUserSlipups() async {
                         charts.SeriesLegend(),
                       ],
                     )
-                  )
+                  ),
+                  const SizedBox(height: 10.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Analiza emocji i objawów'),
+                                  content: const Text('Już wkrótce dostępna!'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // Close the dialog
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                    },
+                    style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                          textStyle: const TextStyle(fontSize: 18.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                    ),
+                    child: const Text('Analizuj'),
+                    
+                    ),
+                    
                 ],
                 
 
               ),
             ),
     );
-  }
-}
-
-class SymptomData {
-  final String date;
-  final int symptomCount;
-  final int plusEmoCount; // Added field
-  final int minusEmoCount; // Added field
-
-  SymptomData({
-    required this.date,
-    required this.symptomCount,
-    required this.plusEmoCount, // Added parameter
-    required this.minusEmoCount, // Added parameter
-  });
-
-  @override
-  String toString() {
-    return 'SymptomData(date: $date, symptomCount: $symptomCount, plusEmoCount: $plusEmoCount, minusEmoCount: $minusEmoCount)';
   }
 }
 

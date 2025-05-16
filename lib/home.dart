@@ -6,7 +6,7 @@ import 'daily.dart';
 import 'login.dart'; // Import the file where LoginPage is defined
 import 'config.dart';
 import 'emo.dart'; 
-import 'history.dart';
+import 'analize.dart';
 import 'widgets/app_bar.dart';
 
 class HomePage extends StatefulWidget {
@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                          Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HistoryPage(userId: widget.userId),
+                          builder: (context) => AnalyzePage(userId: widget.userId),
                         ),
                       );
                       },
@@ -302,7 +302,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HistoryPage(userId: widget.userId),
+                          builder: (context) => AnalyzePage(userId: widget.userId),
                         ),
                       );
                     },
@@ -313,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
-                    child: const Text('Historia'),
+                    child: const Text('Analiza'),
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 
