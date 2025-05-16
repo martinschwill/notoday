@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'config.dart';
-import 'widgets/app_bar.dart'; 
-import 'widgets/chart_data_builder.dart';
-import 'widgets/button_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../common_imports.dart'; 
 
 class AnalyzePage extends StatefulWidget {
   final int userId;
+  final String userName; // Add this line to accept userName
 
-  const AnalyzePage({super.key, required this.userId});
+  const AnalyzePage({super.key, required this.userId, required this.userName});
 
   @override
   State<AnalyzePage> createState() => _AnalyzePageState();
@@ -135,6 +134,7 @@ Future<void> _loadUserSlipups() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
+      endDrawer: CustomDrawer(userName: widget.userName), 
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
         : _chartData.isEmpty

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'analize.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'config.dart';
-import 'widgets/app_bar.dart'; 
-import 'widgets/button_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../common_imports.dart'; 
 
 class EmoPage extends StatefulWidget {
   final int userId; // Pass the user ID to this page
+  final String userName; 
 
-  const EmoPage({super.key, required this.userId});
+  const EmoPage({super.key, required this.userId, required this.userName});
 
   @override
   State<EmoPage> createState() => _EmoPageState();
@@ -128,6 +127,7 @@ class _EmoPageState extends State<EmoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
+      endDrawer: CustomDrawer(userName: widget.userName), 
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -148,7 +148,7 @@ class _EmoPageState extends State<EmoPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AnalyzePage(userId: widget.userId),
+                              builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName),
                             ),
                           );
                         },

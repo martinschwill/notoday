@@ -20,15 +20,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 16.0),
-          child: ClipOval(
-            child: Image.asset(
-              'lib/assets/icon/app_icon.png',
-              width: 40.0,
-              height: 40.0,
-              fit: BoxFit.cover,
+          child: Builder(
+            builder: (context) => IconButton(
+              icon: ClipOval(
+                child: Image.asset(
+                  'lib/assets/icon/app_icon.png',
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              }
             ),
           ),
         ),
+        
       ],
     );
   }

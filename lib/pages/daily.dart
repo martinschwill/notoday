@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:notoday/widgets/app_bar.dart';
-import 'analize.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'config.dart';
-import 'widgets/button_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../common_imports.dart'; 
 
 
 class DailyPage extends StatefulWidget {
   final int userId; // Pass the user ID to this page
+  final String userName; // Pass the user name to this page
 
-  const DailyPage({super.key, required this.userId});
+  const DailyPage({super.key, required this.userId, required this.userName});
 
   @override
   State<DailyPage> createState() => _DailyPageState();
@@ -126,6 +125,7 @@ class _DailyPageState extends State<DailyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
+      endDrawer: CustomDrawer(userName: widget.userName), 
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -146,7 +146,7 @@ class _DailyPageState extends State<DailyPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AnalyzePage(userId: widget.userId),
+                              builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName),
                             ),
                           );
                         },

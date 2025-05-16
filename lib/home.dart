@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:notoday/reminder.dart';
-import 'daily.dart';
-import 'login.dart'; // Import the file where LoginPage is defined
-import 'config.dart';
-import 'emo.dart'; 
-import 'analize.dart';
-import 'widgets/app_bar.dart';
+
+import '../common_imports.dart'; 
 
 class HomePage extends StatefulWidget {
   final int userId;
@@ -192,6 +187,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
+      endDrawer: CustomDrawer(userName: widget.userName), 
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space content between top and bottom
         children: [
@@ -222,7 +218,7 @@ class _HomePageState extends State<HomePage> {
                          Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AnalyzePage(userId: widget.userId),
+                          builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName),
                         ),
                       );
                       },
@@ -260,7 +256,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DailyPage(userId: widget.userId),
+                          builder: (context) => DailyPage(userId: widget.userId, userName: widget.userName),
                         ),
                       );
                     },
@@ -281,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EmoPage(userId: widget.userId),
+                          builder: (context) => EmoPage(userId: widget.userId, userName: widget.userName),
                         ),
                       );
                     },
@@ -302,7 +298,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AnalyzePage(userId: widget.userId),
+                          builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName),
                         ),
                       );
                     },
@@ -323,7 +319,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReminderPage(),
+                          builder: (context) => ReminderPage(userName: widget.userName),
                         ),
                       );
                     },
@@ -339,22 +335,22 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 
                   // Logout Button
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      textStyle: const TextStyle(fontSize: 18.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                    child: const Text('Wyloguj'),
-                  ),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     Navigator.pushReplacement(
+                  //       context,
+                  //       MaterialPageRoute(builder: (context) => const LoginPage()),
+                  //     );
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  //     textStyle: const TextStyle(fontSize: 18.0),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(20.0),
+                  //     ),
+                  //   ),
+                  //   child: const Text('Wyloguj'),
+                  // ),
                 ],
               ),
             ),]

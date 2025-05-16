@@ -3,10 +3,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart'; 
 import 'package:timezone/timezone.dart' as tz;
-import 'widgets/app_bar.dart';
+
+import '../common_imports.dart'; 
 
 class ReminderPage extends StatefulWidget {
-  const ReminderPage({super.key});
+  final String userName; 
+  const ReminderPage({super.key, required this.userName});
 
   @override
   State<ReminderPage> createState() => _ReminderPageState();
@@ -16,7 +18,7 @@ class _ReminderPageState extends State<ReminderPage> {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   TimeOfDay? _selectedTime;
-  
+
   @override
   void initState() {
     super.initState();
@@ -141,6 +143,7 @@ Future<void> _loadSelectedTime() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
+      endDrawer: CustomDrawer(userName: widget.userName), 
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center vertically
