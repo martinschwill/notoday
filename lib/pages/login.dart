@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          final userId = data['user_id']; // Extract user_id from the response
+          final userId = (data['user_id'] as num).toInt(); // Extract user_id from the response
 
           if (userId != null) {
             // Navigate to the HomePage and pass the user_id
