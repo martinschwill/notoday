@@ -191,7 +191,7 @@ class _EmoPageState extends State<EmoPage> {
                             children: [
                               Flexible(
                                 child: Text(
-                                  _emotions[index],
+                                  capitalizeFirst(_emotions[index]),
                                   style: Theme.of(context).textTheme.bodyLarge,
                                   softWrap: true,
                                   overflow: TextOverflow.visible,
@@ -297,7 +297,7 @@ class _EmoPageState extends State<EmoPage> {
                                         onPressed: () {
                                           Navigator.of(context).pop(); // Close the dialog
                                         },
-                                        child: const Text('OK'),
+                                        child: const Text('Zamknij'),
                                       ),
                                       TextButton(
                                         onPressed: () {
