@@ -229,7 +229,6 @@ class _EmoPageState extends State<EmoPage> {
                           setState(() {
                             _selectedRows.clear(); // Clear all selected rows
                           });
-                          print('All selected rows cleared');
                         },
                         text: 'Usuń',
                       ),
@@ -292,7 +291,7 @@ class _EmoPageState extends State<EmoPage> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Dzień zapisany'),
-                                    content: const Text('Emocje na dzisiaj zostały zapisane!'),
+                                    content: const Text('Emocje zapisane! Iść do symptomów?'),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
@@ -300,6 +299,17 @@ class _EmoPageState extends State<EmoPage> {
                                         },
                                         child: const Text('OK'),
                                       ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => DailyPage(userId: widget.userId, userName: widget.userName),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text('Idź'),
+                                      )
                                     ],
                                   );
                                 },

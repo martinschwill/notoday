@@ -306,14 +306,25 @@ class _DailyPageState extends State<DailyPage> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: const Text('Dzień zapisany'),
-                                content: const Text('Symptomy na dzisiaj zostały zapisane!'),
+                                content: const Text('Symptomy zapisane! Iść do emocji?'),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
                                       Navigator.of(context).pop(); // Close the dialog
                                     },
-                                    child: const Text('OK'),
+                                    child: const Text('Zamknij'),
                                   ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EmoPage(userId: widget.userId, userName: widget.userName),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Idź'),
+                                  )
                                 ],
                               );
                             },

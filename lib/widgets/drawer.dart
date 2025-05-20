@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../common_imports.dart';
 
@@ -49,6 +50,10 @@ class CustomDrawer extends StatelessWidget {
               leading: const Icon(Icons.logout),
               title: const Text('Wyloguj'),
               onTap: onLogout ?? () {
+                final storage = const FlutterSecureStorage();
+                storage.delete(key: 'user_id');
+                storage.delete(key: 'user_name');
+                storage.delete(key: 'user_password');
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),

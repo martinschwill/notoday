@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../common_imports.dart'; 
 
@@ -16,8 +17,10 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _userPasswordController = TextEditingController();
 
   Future<void> _login() async {
+    final storage = const FlutterSecureStorage();
     final userName = _userNameController.text.trim();
     final userPassword = _userPasswordController.text.trim();
+    
 
     if (userName.isNotEmpty && userPassword.isNotEmpty) {
       try {
@@ -36,6 +39,10 @@ class _LoginPageState extends State<LoginPage> {
           final userId = (data['user_id'] as num).toInt(); // Extract user_id from the response
 
           if (userId != null) {
+            // Store the user_id in secure storage
+            await storage.write(key: 'user_name', value: userName);
+            await storage.write(key: 'user_password', value: userPassword);
+            await storage.write(key: 'user_id', value: userId.toString());
             // Navigate to the HomePage and pass the user_id
             Navigator.pushReplacement(
               context,
@@ -57,11 +64,35 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _checkCredentials() async{
+      final storage = const FlutterSecureStorage();
+      final savedUserId = await storage.read(key: 'user_id');
+      final savedUserName = await storage.read(key: 'user_name');
+      if (savedUserId != null && savedUserName != null) {
+        // If user_id and user_name is found, navigate to HomePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(userId: int.parse(savedUserId), userName: savedUserName.toString()),
+          ),
+        );
+      } else {
+        return; // No credentials found, do nothing
+      }
+      
+  }
+
   void _showError(String message) {
     if(!mounted) return; // Check if the widget is still mounted
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    _checkCredentials();
   }
 
   @override
