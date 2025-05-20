@@ -134,7 +134,7 @@ Future<void> _loadUserSlipups() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
-      endDrawer: CustomDrawer(userName: widget.userName), 
+      endDrawer: CustomDrawer(userName: widget.userName, userId: widget.userId), 
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
         : _chartData.isEmpty

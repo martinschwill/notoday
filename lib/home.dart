@@ -8,6 +8,7 @@ class HomePage extends StatefulWidget {
   final int userId;
   final String userName;
 
+
   const HomePage({super.key, required this.userId, required this.userName});
 
   @override
@@ -187,7 +188,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
-      endDrawer: CustomDrawer(userName: widget.userName), 
+      endDrawer: CustomDrawer(userName: widget.userName, userId: widget.userId), 
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space content between top and bottom
         children: [
@@ -319,7 +320,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReminderPage(userName: widget.userName),
+                          builder: (context) => ReminderPage(userName: widget.userName, userId: widget.userId,),
                         ),
                       );
                     },

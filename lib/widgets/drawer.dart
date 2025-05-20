@@ -6,9 +6,10 @@ import '../common_imports.dart';
 class CustomDrawer extends StatelessWidget {
   final VoidCallback? onLogout;
   final VoidCallback? onAccount;
-  final String? userName;
+  final String userName;
+  final int userId; 
 
-  const CustomDrawer({super.key, this.onLogout, this.onAccount, this.userName});
+  const CustomDrawer({super.key, this.onLogout, this.onAccount, required this.userName, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +39,26 @@ class CustomDrawer extends StatelessWidget {
                       ],
                     );
                   },
+                );
+              },
+            ),
+          ),
+          const Divider(),
+          SafeArea(
+            minimum: const EdgeInsets.only(left: 20, right: 20),
+            top: false,
+            bottom: false,
+            child: ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(
+                      userId: userId,
+                      userName: userName,
+                    ),
+                  ),
                 );
               },
             ),

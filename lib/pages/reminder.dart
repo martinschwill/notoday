@@ -8,7 +8,8 @@ import '../common_imports.dart';
 
 class ReminderPage extends StatefulWidget {
   final String userName; 
-  const ReminderPage({super.key, required this.userName});
+  final int userId; 
+  const ReminderPage({super.key, required this.userName , required this.userId});
 
   @override
   State<ReminderPage> createState() => _ReminderPageState();
@@ -143,7 +144,7 @@ Future<void> _loadSelectedTime() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
-      endDrawer: CustomDrawer(userName: widget.userName), 
+      endDrawer: CustomDrawer(userName: widget.userName, userId: widget.userId), 
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center vertically

@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
 
+import '../common_imports.dart';
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+ 
   const CustomAppBar({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(
+      title: GestureDetector(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('NOTODAY'),
+                content: const Text('ver 0.8.1'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Text(
         title,
         style: const TextStyle(
           fontSize: 22.0,
@@ -15,6 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           fontFamily: 'Courier New',
           color: Color.fromARGB(255, 117, 151, 167),
         ),
+      ),
       ),
       backgroundColor: const Color.fromARGB(255, 71, 0, 119),
       actions: [
