@@ -30,11 +30,11 @@ class _AnalyzePageState extends State<AnalyzePage> {
     _fetchUserSymptoms();
   }
 
-  Future<void> _fetchUserSymptoms() async {
+  Future<void> _fetchUserSymptoms([int? daysRange]) async {
   try {
     final payload = json.encode({
       "user_id": widget.userId,
-      "days": _daysRange,
+      "days": daysRange ?? _daysRange,
     });
     final response = await http.post(
       Uri.parse('$baseUrl/days/past'),

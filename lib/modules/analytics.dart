@@ -98,3 +98,21 @@ String performCalculation(symptomsRaw, emoPlusRaw, emoMinusRaw, _daysRange) {
 
   return message;
 }
+
+
+List<String> performWarning(symptomsRaw, emoPlusRaw, emoMinusRaw, _daysRange) {
+  List <String> alert = []; 
+  if (averageOfSymptoms(symptomsRaw, 3) / averageOfSymptoms(symptomsRaw, _daysRange) >= 1.2 && symptomTrend(symptomsRaw, _daysRange) == "upward") {
+     alert.add('symptoms'); 
+  }
+  if (averageOfSymptoms(emoMinusRaw, 3) / averageOfSymptoms(emoMinusRaw, _daysRange) >= 1.2 && symptomTrend(emoMinusRaw, _daysRange) == "upward") {
+    alert.add('emoPlus'); 
+  }
+  if (averageOfSymptoms(emoPlusRaw, 3) / averageOfSymptoms(emoPlusRaw, _daysRange) >= 1.2 && symptomTrend(emoPlusRaw, _daysRange) == "upward") {
+    alert.add('emoMinuse'); 
+  }
+  return alert;  
+  }
+
+
+  ///TO DO: USER IT SOMEWHERE IN THE APP TO CREATE A WARNING
