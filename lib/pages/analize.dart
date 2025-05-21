@@ -130,6 +130,63 @@ Future<void> _loadUserSlipups() async {
  _isLoading = false ; 
 }
 
+Future<List<SymptomData>>_getRawSymptomData() async {
+  try {
+    final payload = json.encode({
+      "user_id": widget.userId,
+      "days": _daysRange,
+    });
+    final response = await http.post(
+      Uri.parse('$baseUrl/days/past'),
+      headers: {"Content-Type": "application/json"},
+      body: payload,
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+
+      if (data.isEmpty) {
+       
+        return [];
+      }
+
+      final List<SymptomData> symptomData = data.map((item) {
+        final List<dynamic> emotions = (item['emotions'] ?? []) as List<dynamic>;
+        final List<dynamic> symptoms = (item['symptoms'] ?? []) as List<dynamic>;
+
+        final List<dynamic> plusEmotions = emotions
+            .where((emotion) => emotion['sign'] == 'plus')
+            .toList();
+
+        final List<dynamic> minusEmotions = emotions
+            .where((emotion) => emotion['sign'] == 'minus')
+            .toList();
+
+        return SymptomData(
+          date: item['date'],
+          symptomCount: symptoms.length,
+          plusEmoCount: plusEmotions.length,
+          minusEmoCount: minusEmotions.length,
+        );
+      }).toList();
+      return symptomData; 
+    } else {
+      print('Failed to fetch user symptoms: ${response.statusCode}');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  } catch (e) {
+    print('Error fetching user symptoms: $e');
+    setState(() {
+      _isLoading = false;
+    });
+  } 
+  return []; 
+}
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -257,24 +314,36 @@ Future<void> _loadUserSlipups() async {
                   const SizedBox(height: 10.0),
 
                   CustomButton(
-                    onPressed: (){
+                    onPressed: () async {
+
+                      // Perform the analysis and show the results 
+                      // Compare last 3 days average with the average of picked days range
+                      String title = "Analiza emocji i objawów"; 
+                      final daysData = await _getRawSymptomData();
+                      final symptomsRaw = daysData.map((data) => data.symptomCount).toList();
+                      final emoPlusRaw = daysData.map((data) => data.plusEmoCount).toList();
+                      final emoMinusRaw = daysData.map((data) => data.minusEmoCount).toList();
+                      
+                      String message = performCalculation(symptomsRaw, emoPlusRaw, emoMinusRaw, _daysRange);
+
                       showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Analiza emocji i objawów'),
-                                  content: const Text('Już wkrótce dostępna!'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(); // Close the dialog
-                                      },
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text(title),
+                            content: Text(message),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(); // Close the dialog
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      
                     },
                     text: "Analizuj")
                     

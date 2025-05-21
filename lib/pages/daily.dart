@@ -338,7 +338,7 @@ class _DailyPageState extends State<DailyPage> {
                   }
                 }
               },
-              text: 'Dodaj', 
+              text: 'Zapisz', 
               ),
           ],
         ),
