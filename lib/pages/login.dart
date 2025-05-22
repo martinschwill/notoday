@@ -60,6 +60,17 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _register() async{
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RegisterPage(),
+      ),
+    );
+    return;
+  } 
+
+
   void _checkCredentials() async{
       final storage = const FlutterSecureStorage();
       final savedUserId = await storage.read(key: 'user_id');
@@ -135,9 +146,17 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: const Text('Zaloguj'),
             ),
+           
           ],
         ),
       ),
+      bottomNavigationBar: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: CustomButton(
+        onPressed: _register,
+        text: 'Zarejestruj',
+      )
+    ),
     );
   }
 }

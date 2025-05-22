@@ -10,6 +10,7 @@ export 'pages/emo.dart';
 export 'pages/analize.dart';
 export 'home.dart';
 export 'modules/analytics.dart'; 
+export 'pages/register.dart';
 
 
 String capitalizeFirst(String input) {
