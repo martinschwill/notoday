@@ -1,4 +1,3 @@
-import '../common_imports.dart'; 
 
 class Analytics {
   final int userId;
@@ -109,7 +108,7 @@ List<String> performWarning(symptomsRaw, emoPlusRaw, emoMinusRaw, _daysRange) {
     alert.add('emoPlus'); 
   }
   if (averageOfSymptoms(emoPlusRaw, 3) / averageOfSymptoms(emoPlusRaw, _daysRange) >= 1.2 && symptomTrend(emoPlusRaw, _daysRange) == "upward") {
-    alert.add('emoMinuse'); 
+    alert.add('emoMinus'); 
   }
   return alert;  
   }

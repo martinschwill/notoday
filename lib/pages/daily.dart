@@ -223,7 +223,7 @@ class _DailyPageState extends State<DailyPage> {
               text: 'Usuń', 
             ),
 
-            // Dodaj Button
+            // Zapisz Button
             CustomButton(
               onPressed: () async {
                 if (_selectedRows.isEmpty) {

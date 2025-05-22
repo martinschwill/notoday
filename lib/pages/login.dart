@@ -38,22 +38,18 @@ class _LoginPageState extends State<LoginPage> {
           final data = json.decode(response.body);
           final userId = (data['user_id'] as num).toInt(); // Extract user_id from the response
 
-          if (userId != null) {
-            // Store the user_id in secure storage
-            await storage.write(key: 'user_name', value: userName);
-            await storage.write(key: 'user_password', value: userPassword);
-            await storage.write(key: 'user_id', value: userId.toString());
-            // Navigate to the HomePage and pass the user_id
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(userId: userId, userName: userName),
-              ),
-            );
-          } else {
-            _showError('Niepoprawne dane logowania');
-          }
-        } else {
+          // Store the user_id in secure storage
+          await storage.write(key: 'user_name', value: userName);
+          await storage.write(key: 'user_password', value: userPassword);
+          await storage.write(key: 'user_id', value: userId.toString());
+          // Navigate to the HomePage and pass the user_id
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(userId: userId, userName: userName),
+            ),
+          );
+                } else {
           _showError('Nieudane logowanie: ${response.statusCode}');
         }
       } catch (e) {
