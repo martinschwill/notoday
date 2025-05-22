@@ -9,6 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      centerTitle: true,
       title: GestureDetector(
         onTap: () {
           showDialog(
@@ -16,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text('NOTODAY'),
-                content: const Text('ver 0.8.1'),
+                content: const Text('ver 0.9.0'),
                 actions: <Widget>[
                   TextButton(
                     child: const Text('OK'),
@@ -30,6 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           );
         },
         child: Text(
+        textAlign: TextAlign.center,
         title,
         style: const TextStyle(
           fontSize: 22.0,

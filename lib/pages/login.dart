@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(userId: userId, userName: userName),
+              builder: (context) => HomePage(userId: userId, userName: userName, wasOpened: false),
             ),
           );
                 } else {
@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomePage(userId: int.parse(savedUserId), userName: savedUserName.toString()),
+            builder: (context) => HomePage(userId: int.parse(savedUserId), userName: savedUserName.toString(), wasOpened: false),
           ),
         );
       } else {

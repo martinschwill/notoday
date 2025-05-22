@@ -57,6 +57,7 @@ class CustomDrawer extends StatelessWidget {
                     builder: (context) => HomePage(
                       userId: userId,
                       userName: userName,
+                      wasOpened: true, 
                     ),
                   ),
                 );

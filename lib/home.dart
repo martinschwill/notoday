@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../common_imports.dart'; 
 
 class HomePage extends StatefulWidget {
   final int userId;
   final String userName;
+  final bool wasOpened; // Flag to check if the page was opened
 
-
-  const HomePage({super.key, required this.userId, required this.userName});
+  const HomePage({super.key, required this.userId, required this.userName, required this.wasOpened});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int daysSinceSober = 0; // Variable to store the number of days
+  bool isFirstTime = true; 
   String date = ""; // Variable to store the date
 
   Future<void> _fetchDaysSinceSober() async {
@@ -26,6 +28,7 @@ class _HomePageState extends State<HomePage> {
         final data = json.decode(response.body);
         setState(() {
           daysSinceSober = data['days_since_sober']; // Parse the integer from the response
+          isFirstTime = false; 
         });
       } else {
         print('Failed to fetch days since sober');
@@ -35,15 +38,35 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<bool> _isFirstRun() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'already_ran_${widget.userId}';
+    final alreadyRan = prefs.getBool(key) ?? false;
+    if (!alreadyRan) {
+      await prefs.setBool(key, true);
+      return true; // This is the first run for this user
+    }
+    return false; // Not the first run for this user
+  }
+
+
   @override
   void initState() {
     super.initState();
     _fetchDaysSinceSober(); // Fetch the number of days when the widget is initialized
-
-    // Defer the popup until after the widget tree is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showSobrietyPopup(); // Show the sobriety popup
-    });
+    _isFirstRun().then((firstTime){ // check if it's the first run
+      if(firstTime) { 
+        _showDatePickerPopup();  // if yes show datepicker to setup first dates 
+      }else {
+        if(!widget.wasOpened) { // if no and the page was not opened during this session, show the sobriety popup
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showSobrietyPopup(); 
+          });
+        }
+      }
+    }); 
+   
+    
   }
 
   void _showSobrietyPopup() {
@@ -75,9 +98,6 @@ class _HomePageState extends State<HomePage> {
 
   void _showDatePickerPopup() {
     DateTime selectedDate = DateTime.now(); // Default to the current date
-
-    
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
