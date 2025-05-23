@@ -18,9 +18,15 @@ class ChartDataBuilder {
         barRods: [
           BarChartRodData(
             toY: data.symptomCount.toDouble(),
-            color: hasSlipup 
-                ? const Color.fromARGB(255, 223, 2, 2)
-                : Colors.blueGrey,
+            gradient: hasSlipup
+            ? LinearGradient(
+              colors: [
+                const Color.fromARGB(255, 157, 150, 6),
+                Color.fromARGB(255, 0, 0, 0)
+              ],
+            )
+            : null, 
+            color: Colors.blueGrey,
             width: 8,
             borderRadius: BorderRadius.circular(4),
           ),
@@ -45,7 +51,7 @@ class ChartDataBuilder {
       LineChartBarData(
         spots: minusEmoSpots,
         isCurved: true,
-        color: Colors.red,
+        color: Colors.red.withOpacity(0.7),
         barWidth: 1,
         dotData: const FlDotData(show: false),
         belowBarData: BarAreaData(
@@ -56,7 +62,7 @@ class ChartDataBuilder {
       LineChartBarData(
         spots: plusEmoSpots,
         isCurved: true,
-        color: Colors.green,
+        color: Colors.green.withOpacity(0.7),
         barWidth: 1,
         dotData: const FlDotData(show: false),
         belowBarData: BarAreaData(
@@ -80,13 +86,13 @@ class ChartDataBuilder {
         barRods: [
           BarChartRodData(
             toY: data.minusEmoCount.toDouble(),
-            color: Colors.red,
+            color: const Color.fromARGB(255, 222, 54, 42),
             width: 4,
             borderRadius: BorderRadius.circular(4),
           ),
           BarChartRodData(
             toY: data.plusEmoCount.toDouble(),
-            color: Colors.green,
+            color: const Color.fromARGB(255, 63, 145, 66),
             width: 4,
             borderRadius: BorderRadius.circular(4),
           ),

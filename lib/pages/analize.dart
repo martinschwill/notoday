@@ -21,11 +21,15 @@ class _AnalyzePageState extends State<AnalyzePage> {
   List<BarChartGroupData> _chartData = [];
   List<LineChartBarData> _lineData = [];
   List<BarChartGroupData> _chartData2 = [];
+  List<PieChartSectionData> _emotionsPieData = []; // Added for pie chart
   List<dynamic> _slipups = []; 
   List<SymptomData> symptomData = [];
   bool _isLoading = true;
   int _daysRange = 30; // Default to 30 days
 
+  // Added structure to hold emotion totals
+  late EmotionsTotal _emotionsTotal;
+  
   @override
   void initState() {
     super.initState();
@@ -81,6 +85,8 @@ class _AnalyzePageState extends State<AnalyzePage> {
         _chartData = ChartDataBuilder.buildChartData(symptomData, _slipups, formatToDayMonth);
         _lineData = ChartDataBuilder.buildLineData(symptomData, formatToDayMonth);
         _chartData2 = ChartDataBuilder.buildChartData2(symptomData, formatToDayMonth);
+        _emotionsTotal = _calculateEmotionsTotal(symptomData); // Calculate emotions total
+        _emotionsPieData = _generatePieData(_emotionsTotal); // Generate pie chart data
         _isLoading = false;
       });
       
@@ -186,6 +192,47 @@ Future<List<SymptomData>>_getRawSymptomData() async {
   return []; 
 }
 
+  // Method to calculate emotion totals from symptom data
+  EmotionsTotal _calculateEmotionsTotal(List<SymptomData> data) {
+    int totalPositive = 0;
+    int totalNegative = 0;
+    
+    for (var symptom in data) {
+      totalPositive += symptom.plusEmoCount;
+      totalNegative += symptom.minusEmoCount;
+    }
+    
+    return EmotionsTotal(totalPositive, totalNegative);
+  }
+
+  // Method to generate pie chart sections from emotions total
+  List<PieChartSectionData> _generatePieData(EmotionsTotal emotionsTotal) {
+    return [
+      PieChartSectionData(
+        value: emotionsTotal.positiveEmotions.toDouble(),
+        title: '${(emotionsTotal.positivePercentage * 100).round()}%',
+        color: const Color.fromARGB(255, 68, 159, 71), // Green
+        radius: 60,
+        titleStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      PieChartSectionData(
+        value: emotionsTotal.negativeEmotions.toDouble(),
+        title: '${(emotionsTotal.negativePercentage * 100).round()}%',
+        color: const Color.fromARGB(255, 225, 55, 43), // Red
+        radius: 60,
+        titleStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    ];
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -200,265 +247,349 @@ Future<List<SymptomData>>_getRawSymptomData() async {
                     style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                   ),
                 )
-              : Padding(
-                  padding: const EdgeInsets.only(left: 28.0, right: 28.0, top: 10.0, bottom: 20.0),
-                  child: Column(
-                    children: [
-                      // Date range slider 
-                      Row(
+              : Column(
+                  children: [
+                    // Fixed top area with the slider
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 10.0),
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text('Zakres dni:'),
-                          Slider(
-                            value: _daysRange.toDouble(),
-                            min: 7,
-                            max: 60,
-                            divisions: 53,
-                            label: '$_daysRange',
-                            onChanged: (double value) {
-                              setState(() {
-                                _daysRange = value.round();
-                              });
-                            },
-                            onChangeEnd: (double value) {
-                              _fetchUserSymptoms(); // Fetch new data when user stops sliding
-                            },
+                          Expanded(
+                            child: Slider(
+                              value: _daysRange.toDouble(),
+                              min: 7,
+                              max: 60,
+                              divisions: 53,
+                              label: '$_daysRange',
+                              onChanged: (double value) {
+                                setState(() {
+                                  _daysRange = value.round();
+                                });
+                              },
+                              onChangeEnd: (double value) {
+                                _fetchUserSymptoms(); // Fetch new data when user stops sliding
+                              },
+                            ),
                           ),
                           Text('$_daysRange'),
                         ],
                       ),
-                      const SizedBox(height: 10.0),
+                    ),
 
-                      // First Chart - Combined Bar and Line Chart
-                      Container(
-                        height: 260,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: Stack(
-                          alignment: Alignment.center,
+                    // Scrollable middle area with charts
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                        child: Column(
                           children: [
-                            BarChart(
-                              BarChartData(
-                                alignment: BarChartAlignment.center,
-                                barTouchData: BarTouchData(
-                                  enabled: true,
-                                ),
-                                titlesData: FlTitlesData(
-                                  show: true,
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 40,
-                                      getTitlesWidget: (double value, TitleMeta meta) {
-                                        if (true) {
-                                          return Transform.rotate(
-                                            angle: 45,
-                                            child: Text(
-                                              ChartDataBuilder.getBottomTitles(symptomData, formatToDayMonth)[value.toInt()],
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        
-                                      },
-                                    ),
-                                  ),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 26,
-                                      getTitlesWidget:(value, meta) => 
-                                        Text(
-                                          value.toInt().toString(),
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 12,
+                            const SizedBox(height: 12.0),
+
+                            // First Chart - Combined Bar and Line Chart
+                            Container(
+                              height: 260,
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  BarChart(
+                                    BarChartData(
+                                      alignment: BarChartAlignment.center,
+                                      barTouchData: BarTouchData(
+                                        enabled: true,
+                                      ),
+                                      titlesData: FlTitlesData(
+                                        show: true,
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 40,
+                                            getTitlesWidget: (double value, TitleMeta meta) {
+                                              if (true) {
+                                                return Transform.rotate(
+                                                  angle: 45,
+                                                  child: Text(
+                                                    ChartDataBuilder.getBottomTitles(symptomData, formatToDayMonth)[value.toInt()],
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 10,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                              
+                                            },
                                           ),
                                         ),
-                                    ),
-                                  ),
-                                  topTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  rightTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                ),
-                                gridData: FlGridData(
-                                  show: true,
-                                  drawHorizontalLine: true,
-                                  drawVerticalLine: false,
-                                ),
-                                borderData: FlBorderData(
-                                  show: true,
-                                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                                ),
-                                barGroups: _chartData,
-                                maxY: _getMaxY(_chartData).round().toDouble(),
-                              ),
-                            ),
-                            LineChart(
-                              LineChartData(
-                                lineBarsData: _lineData,
-                                minY: 0,
-                                maxY: _getMaxY(_chartData),
-                                titlesData:FlTitlesData(
-                                  show: true,
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 40,
-                                      getTitlesWidget: (double value, TitleMeta meta) {
-                                        if (true) {
-                                          return Transform.rotate(
-                                            angle: 45,
-                                            child: Text(
-                                              ChartDataBuilder.getBottomTitles(symptomData, formatToDayMonth)[value.toInt()],
-                                              style: const TextStyle(
-                                                color: Colors.transparent,
-                                                fontSize: 8,
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 26,
+                                            getTitlesWidget:(value, meta) => 
+                                              Text(
+                                                value.toInt().toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 12,
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        }
-                                        
-                                      },
-                                    ),
-                                  ),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 26,
-                                      getTitlesWidget: (value, meta) {
-                                        return Text(
-                                          value.toInt().toString(),
-                                          style: const TextStyle(
-                                            color: Colors.transparent,
-                                            fontSize: 8,
                                           ),
-                                        );
-                                      },
+                                        ),
+                                        topTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        rightTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                      ),
+                                      gridData: FlGridData(
+                                        show: true,
+                                        drawHorizontalLine: true,
+                                        drawVerticalLine: false,
+                                      ),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                      ),
+                                      barGroups: _chartData,
+                                      maxY: _getMaxY(_chartData).round().toDouble(),
                                     ),
                                   ),
-                                  topTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
+                                  LineChart(
+                                    LineChartData(
+                                      lineBarsData: _lineData,
+                                      minY: 0,
+                                      maxY: _getMaxY(_chartData),
+                                      titlesData:FlTitlesData(
+                                        show: true,
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 40,
+                                            getTitlesWidget: (double value, TitleMeta meta) {
+                                              if (true) {
+                                                return Transform.rotate(
+                                                  angle: 45,
+                                                  child: Text(
+                                                    ChartDataBuilder.getBottomTitles(symptomData, formatToDayMonth)[value.toInt()],
+                                                    style: const TextStyle(
+                                                      color: Colors.transparent,
+                                                      fontSize: 8,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                              
+                                            },
+                                          ),
+                                        ),
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 26,
+                                            getTitlesWidget: (value, meta) {
+                                              return Text(
+                                                value.toInt().toString(),
+                                                style: const TextStyle(
+                                                  color: Colors.transparent,
+                                                  fontSize: 8,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        topTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        rightTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                      ),
+                                      gridData: FlGridData(show: false),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                      ),
+                                    ),
                                   ),
-                                  rightTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
+                                  Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          _legendItem('Objawy', Colors.blueGrey),
+                                          const SizedBox(width: 20),
+                                          _legendItem('Emocje-', const Color.fromARGB(255, 225, 55, 43)),
+                                          const SizedBox(width: 20),
+                                          _legendItem('Emocje+', const Color.fromARGB(255, 68, 159, 71)),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                gridData: FlGridData(show: false),
-                                borderData: FlBorderData(
-                                  show: true,
-                                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                ],
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 9.0, bottom: 30.0),
+                              child: Divider(
+                                color: Colors.grey, // Line color
+                                thickness: 2,      // Line thickness
+                                height: 2,         // Space the line takes vertically
+                              ),
+                            ),
+                            
+                            // Second Chart - Bar Chart
+                            SizedBox(
+                              height: 260,
+                              child: BarChart(
+                                BarChartData(
+                                  alignment: BarChartAlignment.center,
+                                  groupsSpace: 8,
+                                  barTouchData: BarTouchData(
+                                    enabled: true,
+                                  ),
+                                  titlesData: FlTitlesData(
+                                    show: true,
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 40,
+                                        getTitlesWidget: (double value, TitleMeta meta) {
+                                          if (value.toInt() >= 0 && value.toInt() < ChartDataBuilder.getBottomTitles(_chartData.isEmpty ? [] : symptomData, formatToDayMonth).length) {
+                                            return Transform.rotate(
+                                              angle: 45,
+                                              child: Text(
+                                                ChartDataBuilder.getBottomTitles(symptomData, formatToDayMonth)[value.toInt()],
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return const Text('');
+                                        },
+                                      ),
+                                    ),
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 26,
+                                        getTitlesWidget: (value, meta) => 
+                                          Text(
+                                            value.toInt().toString(),
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                      ),
+                                    ),
+                                    topTitles: AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    rightTitles: AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                  ),
+                                  gridData: FlGridData(
+                                    show: true,
+                                    drawHorizontalLine: true,
+                                    drawVerticalLine: false,
+                                  ),
+                                  borderData: FlBorderData(
+                                    show: true,
+                                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                  ),
+                                  barGroups: _chartData2,
+                                  maxY: _getMaxY(_chartData2).round().toDouble(),
                                 ),
                               ),
                             ),
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _legendItem('Objawy', Colors.blueGrey),
-                                    const SizedBox(width: 20),
-                                    _legendItem('Emocje-', Colors.red),
-                                    const SizedBox(width: 20),
-                                    _legendItem('Emocje+', Colors.green),
-                                  ],
+
+                            // Add divider before pie chart
+                            const Padding(
+                              padding: EdgeInsets.only(top: 30.0, bottom: 20.0),
+                              child: Divider(
+                                color: Colors.grey,
+                                thickness: 2,
+                                height: 2,
+                              ),
+                            ),
+
+                            // Add pie chart title
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                'Stosunek emocji przyjemnych i nieprzyjemnych',
+                                style: TextStyle(
+                                  fontSize: 16.0, 
+                                  fontWeight: FontWeight.bold
                                 ),
                               ),
                             ),
+
+                            // Add pie chart
+                            SizedBox(
+                              height: 240,
+                              width: double.infinity,
+                              child: _emotionsPieData.isEmpty
+                                ? const Center(child: Text('Brak danych do wyświetlenia'))
+                                : Column(
+                                    children: [
+                                      Expanded(
+                                        child: PieChart(
+                                          PieChartData(
+                                            sections: _emotionsPieData,
+                                            centerSpaceRadius: 40,
+                                            sectionsSpace: 2,
+                                            pieTouchData: PieTouchData(
+                                              touchCallback: (FlTouchEvent event, pieTouchResponse) {},
+                                              enabled: true,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      // Add legend for pie chart
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          _legendItem('Przyjemne', const Color.fromARGB(255, 68, 159, 71)),
+                                          const SizedBox(width: 30),
+                                          _legendItem('Nieprzyjemne', const Color.fromARGB(255, 225, 55, 43)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // Add totals
+                                      _emotionsTotal.total > 0
+                                          ? Text(
+                                              'Emocje przyjemne: ${_emotionsTotal.positiveEmotions}, '
+                                              'Emocje nieprzyjemne: ${_emotionsTotal.negativeEmotions}',
+                                              style: const TextStyle(fontSize: 12),
+                                            )
+                                          : const SizedBox(),
+                                    ],
+                                  ),
+                            ),
+                            
+                            // Add space at the bottom for better scrolling experience
+                            const SizedBox(height: 20.0),
                           ],
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 18.0),
-                        child: Divider(
-                          color: Colors.grey, // Line color
-                          thickness: 2,      // Line thickness
-                          height: 2,         // Space the line takes vertically
-                        ),
-                      ),
-                      
-                      // Second Chart - Bar Chart
-                      SizedBox(
-                        height: 260,
-                        child: BarChart(
-                          BarChartData(
-                            alignment: BarChartAlignment.center,
-                            groupsSpace: 8,
-                            barTouchData: BarTouchData(
-                              enabled: true,
-                            ),
-                            titlesData: FlTitlesData(
-                              show: true,
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 40,
-                                  getTitlesWidget: (double value, TitleMeta meta) {
-                                    if (value.toInt() >= 0 && value.toInt() < ChartDataBuilder.getBottomTitles(_chartData.isEmpty ? [] : symptomData, formatToDayMonth).length) {
-                                      return Transform.rotate(
-                                        angle: 45,
-                                        child: Text(
-                                          ChartDataBuilder.getBottomTitles(symptomData, formatToDayMonth)[value.toInt()],
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return const Text('');
-                                  },
-                                ),
-                              ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 26,
-                                  getTitlesWidget: (value, meta) => 
-                                    Text(
-                                      value.toInt().toString(),
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                ),
-                              ),
-                              topTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              rightTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                            ),
-                            gridData: FlGridData(
-                              show: true,
-                              drawHorizontalLine: true,
-                              drawVerticalLine: false,
-                            ),
-                            borderData: FlBorderData(
-                              show: true,
-                              border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                            ),
-                            barGroups: _chartData2,
-                            maxY: _getMaxY(_chartData2).round().toDouble(),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 10.0),
+                    ),
 
-                      CustomButton(
+                    // Fixed bottom button area
+                    Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: CustomButton(
                         onPressed: () async {
                           // Perform the analysis and show the results 
                           // Compare last 3 days average with the average of picked days range
@@ -488,9 +619,10 @@ Future<List<SymptomData>>_getRawSymptomData() async {
                             },
                           );
                         },
-                        text: "Analizuj")
-                    ],
-                  ),
+                        text: "Analizuj",
+                      ),
+                    ),
+                  ],
                 ),
     );
   }
@@ -510,7 +642,7 @@ Widget _legendItem(String text, Color color) {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(5),
         ),
       ),
       const SizedBox(width: 4),
@@ -535,4 +667,16 @@ double _getMaxY(List<BarChartGroupData> chartData) {
     }
   }
   return maxValue * 1.2; // Add 20% margin on top
+}
+
+// Data structure to hold emotion totals for pie chart
+class EmotionsTotal {
+  final int positiveEmotions;
+  final int negativeEmotions;
+  
+  EmotionsTotal(this.positiveEmotions, this.negativeEmotions);
+  
+  int get total => positiveEmotions + negativeEmotions;
+  double get positivePercentage => total == 0 ? 0 : positiveEmotions / total;
+  double get negativePercentage => total == 0 ? 0 : negativeEmotions / total;
 }
