@@ -290,12 +290,14 @@ Future<List<SymptomData>>_getRawSymptomData() async {
                       height: 2,         // Space the line takes vertically
                     ),
                   ),
+                  
+                  
                   SizedBox(
                     height: 260,
                     child: charts.BarChart(
                       _chartData2,
                       animate: true,
-                      barGroupingType: charts.BarGroupingType.grouped, // <-- This is important!
+                      barGroupingType: charts.BarGroupingType.groupedStacked, // <-- This is important!
                       domainAxis: const charts.OrdinalAxisSpec(
                         renderSpec: charts.SmallTickRendererSpec(
                           labelRotation: 45,

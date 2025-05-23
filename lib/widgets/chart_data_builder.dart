@@ -12,6 +12,7 @@ List<charts.Series<SymptomData, String>> buildChartData(
       colorFn: (SymptomData symptoms, __) => slipups.contains(symptoms.date)
           ? charts.ColorUtil.fromDartColor(const Color.fromARGB(255, 223, 2, 2))
           : charts.ColorUtil.fromDartColor(Colors.blueGrey),
+
       labelAccessorFn: (SymptomData symptoms, __) =>
           slipups.contains(symptoms.date) ? 'Z' : '',
       domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
@@ -47,19 +48,37 @@ List<charts.Series<SymptomData, String>> buildChartData2(
   return [
     charts.Series<SymptomData, String>(
             id: 'Emocje -',
+            seriesCategory: 'A',
             colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
             domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
             data: symptomData,
           ),
+          // charts.Series<SymptomData, String>(
+          //   id: 'Emocje +',
+          //   seriesCategory: 'A',
+          //   colorFn: (_, __) => charts.MaterialPalette.gray.shadeDefault,
+          //   domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
+          //   measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
+          //   data: symptomData,
+          // ),
 
           charts.Series<SymptomData, String>(
             id: 'Emocje +',
+            seriesCategory: 'B',
             colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
             domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
             measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
             data: symptomData,
-          )
+          ), 
+          // charts.Series<SymptomData, String>(
+          //   id: 'Emocje -',
+          //   seriesCategory: 'B',
+          //   colorFn: (_, __) => charts.MaterialPalette.gray.shadeDefault,
+          //   domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
+          //   measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
+          //   data: symptomData,
+          // ),
   ];
 }
 class SymptomData {

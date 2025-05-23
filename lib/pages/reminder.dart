@@ -204,6 +204,7 @@ Future<void> _loadSelectedTime() async {
                 mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
                 crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch buttons to full width
                 children: [
+                  const SizedBox(height: 72.0),
                   // Button: Czas przypomnienia
                   ElevatedButton(
                     onPressed: () {
@@ -220,7 +221,7 @@ Future<void> _loadSelectedTime() async {
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 
-                  // Button: Emocje
+                  // Button: Cancel Notification
                   ElevatedButton(
                     onPressed: () {
                       _cancelNotification();
