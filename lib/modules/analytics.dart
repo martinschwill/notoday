@@ -43,56 +43,60 @@ String symptomTrend(List<int> dailySymptoms, int days) {
 }
 
 String performCalculation(symptomsRaw, emoPlusRaw, emoMinusRaw, _daysRange) {
-  String message = ""; 
+  String message = "Objawy: "; 
   double avgSympt = averageOfSymptoms(symptomsRaw, 3) / averageOfSymptoms(symptomsRaw, _daysRange);
   if (avgSympt >= 1.2) {
-    message += "Objawy: Wzrost o ${((avgSympt) * 100).toStringAsFixed(2)}% \n";
+    message += "Wzrost o ${((avgSympt) * 100).toStringAsFixed(2)}% \n";
   } else if (avgSympt <= 0.8) {
-    message += "Objawy: Spadek o ${((avgSympt) * 100).toStringAsFixed(2)}% \n";
+    message += "Spadek o ${((avgSympt) * 100).toStringAsFixed(2)}% \n";
   } else {
-    message += "Objawy: Stabilne \n";
+    message += "Stabilne \n";
   }
+  message += "Trend objawów: ";
   String symptTrend = symptomTrend(symptomsRaw, _daysRange);
   if (symptTrend == "upward") {
-    message += "Trend objawów: Wzrostowy \n\n";
+    message += "Wzrostowy \n\n";
   } else if (symptTrend == "downward") {
-    message += "Trend objawów: Spadkowy \n\n";
+    message += "Spadkowy \n\n";
   } else {
-    message += "Trend objawów: Stabilny \n\n";
+    message += "Stabilny \n\n";
   }
   
+  message += "Emocje przyjemne: ";
   double avgEmoPlus = averageOfSymptoms(emoPlusRaw, 3) / averageOfSymptoms(emoPlusRaw, _daysRange);
   if (avgEmoPlus >= 1.2) {
-    message += "Emocje przyjemne: Wzrost o ${((avgEmoPlus) * 100).toStringAsFixed(2)}% \n";
+    message += "Wzrost o ${((avgEmoPlus) * 100).toStringAsFixed(2)}% \n";
   } else if (avgEmoPlus <= 0.8) {
-    message += "Emocje przyjemne: Spadek o ${((avgEmoPlus) * 100).toStringAsFixed(2)}% \n";
+    message += "Spadek o ${((avgEmoPlus) * 100).toStringAsFixed(2)}% \n";
   } else {
-    message += "Emocje przyjemne: Stabilne \n";
+    message += "Stabilne \n";
   }
+  message += "Trend emocji przyjemnych: ";
   String emoPlusTrend = symptomTrend(emoPlusRaw, _daysRange); 
   if (emoPlusTrend == "upward") {
-    message += "Trend emocji przyjemnych: Wzrostowy \n\n";
+    message += "Wzrostowy \n\n";
   } else if (emoPlusTrend == "downward") {
-    message += "Trend emocji przyjemnych: Spadkowy \n\n";
+    message += "Spadkowy \n\n";
   } else {
-    message += "Trend emocji przyjemnych: Stabilny \n\n";
+    message += "Stabilny \n\n";
   }
-
+  message += "Emocje nieprzyjemne: ";
   double avgEmoMinus = averageOfSymptoms(emoMinusRaw, 3) / averageOfSymptoms(emoMinusRaw, _daysRange);
   if (avgEmoMinus >= 1.2) {
-    message += "Emocje nieprzyjemne: Wzrost o ${((avgEmoMinus) * 100).toStringAsFixed(2)}% \n";
+    message += "Wzrost o ${((avgEmoMinus) * 100).toStringAsFixed(2)}% \n";
   } else if (avgEmoMinus <= 0.8) {
-    message += "Emocje nieprzyjemne: Spadek o ${((avgEmoMinus) * 100).toStringAsFixed(2)}% \n";
+    message += "Spadek o ${((avgEmoMinus) * 100).toStringAsFixed(2)}% \n";
   } else {
-    message += "Emocje nieprzyjemne: Stabilne \n";
+    message += "Stabilne \n";
   }
+  message += "Trend emocji nieprzyjemnych: ";
   String emoMinusTrend = symptomTrend(emoMinusRaw, _daysRange);
   if (emoMinusTrend == "upward") {
-    message += "Trend emocji nieprzyjemnych: Wzrostowy \n\n";
+    message += "Wzrostowy \n\n";
   } else if (emoMinusTrend == "downward") {
-    message += "Trend emocji nieprzyjemnych: Spadkowy \n\n";
+    message += "Spadkowy \n\n";
   } else {
-    message += "Trend emocji nieprzyjemnych: Stabilny ";
+    message += "Stabilny \n\n";
   }
 
   return message;
