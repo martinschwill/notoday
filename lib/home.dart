@@ -255,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                           '$daysSinceSober',
                           style: const TextStyle(
                             fontSize: 60.0,
-                            fontWeight: FontWeight.w200,
+                            fontWeight: FontWeight.w100,
                             color: Colors.white,
                           ),
                         ),

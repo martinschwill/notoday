@@ -145,64 +145,131 @@ Future<void> _loadSelectedTime() async {
     return Scaffold(
       appBar: const CustomAppBar(title: 'NOTODAY'),
       endDrawer: CustomDrawer(userName: widget.userName, userId: widget.userId), 
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-          crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Center vertically
+          // crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
-                children: [
-                  Text(
-                    _selectedTime == null
-                        ? 'Brak przypomnienia'
-                        : 'Przypomnij o \n\n\n${_selectedTime!.format(context)}',
+           Padding(
+            padding: const EdgeInsets.only(top: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                 Center(
+                  child: Text(
+                    'Przypomnienie \n o wypełnieniu dzienników',
                     style: const TextStyle(
-                      fontSize: 26.0,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.blueGrey,
+                    fontSize: 24.0, // Adjust the font size as needed
+                    fontWeight: FontWeight.w300, // Optional: Make the text bold
+                    color: Colors.blueGrey, // Optional: Keep the color consistent
                     ),
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.center, // Center the text horizontally
+                    )),
+                    const SizedBox(height: 32.0),
+            Center(
+              child: Material(
+                    color: Colors.transparent, // Make the background transparent
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(80.0), // Match the circle shape
+                      onTap: () {
+                        _pickTime();
+                      },
+                      child: Container(
+                        width: 160.0,
+                        height: 160.0,
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _selectedTime == null
+                              ? '--:--'
+                              : '${_selectedTime!.format(context)}',
+                          style: const TextStyle(
+                            fontSize: 54.0,
+                            fontWeight: FontWeight.w100,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 100),
+            ),
+            const SizedBox(height: 32.0),
+            
+            Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
+                crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch buttons to full width
+                children: [
+                  // Button: Czas przypomnienia
                   ElevatedButton(
                     onPressed: () {
                       _pickTime();
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
-                      textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      textStyle: const TextStyle(fontSize: 18.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
                     child: const Text('Wybierz czas przypomnienia'),
                   ),
-                  const SizedBox(height: 30.0), // Space between buttons
+                  const SizedBox(height: 20.0), // Add vertical spacing between buttons
+
+                  // Button: Emocje
                   ElevatedButton(
                     onPressed: () {
                       _cancelNotification();
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0), // Adjust padding for a larger button
-                      textStyle: const TextStyle(fontSize: 18.0), // Bigger font size
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      textStyle: const TextStyle(fontSize: 18.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0), // Match the roundness of the date background
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
-                    child: const Text('Anuluj przypomnienie'),
+                    child: const Text('Usuń przypomnienie'),
                   ),
+                  const SizedBox(height: 20.0), // Add vertical spacing between buttons
+
                   
+                  
+
+                  // Logout Button
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     Navigator.pushReplacement(
+                  //       context,
+                  //       MaterialPageRoute(builder: (context) => const LoginPage()),
+                  //     );
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  //     textStyle: const TextStyle(fontSize: 18.0),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(20.0),
+                  //     ),
+                  //   ),
+                  //   child: const Text('Wyloguj'),
+                  // ),
                 ],
               ),
+            ),]
             ),
-          ],
-        ),
-      ),
+          ),
+
+
+
+       ]
+    ));
           
-    );
+        
+      
+          
+    
   }
 }

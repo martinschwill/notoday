@@ -52,7 +52,7 @@ class CustomDrawer extends StatelessWidget {
               leading: const Icon(Icons.home),
               title: const Text('Home'),
               onTap: () {
-                Navigator.of(context).pushReplacement(
+                Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (context) => HomePage(
                       userId: userId,
@@ -60,6 +60,7 @@ class CustomDrawer extends StatelessWidget {
                       wasOpened: true, 
                     ),
                   ),
+                  (route) => false,
                 );
               },
             ),
@@ -76,9 +77,10 @@ class CustomDrawer extends StatelessWidget {
                 storage.delete(key: 'user_id');
                 storage.delete(key: 'user_name');
                 storage.delete(key: 'user_password');
-                Navigator.pushReplacement(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false,
                 );
               },
             ),

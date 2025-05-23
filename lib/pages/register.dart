@@ -68,11 +68,11 @@ class _RegisterPageState extends State<RegisterPage> {
               actions: [
                 TextButton(
                   onPressed: () =>
-                  Navigator.pushReplacement(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
-                    ),
+                      builder: (context) => const LoginPage()),
+                    (route) => false
                   ),
                   child: const Text('OK'),
                 ),
