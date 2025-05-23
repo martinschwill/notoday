@@ -1,85 +1,103 @@
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-List<charts.Series<SymptomData, String>> buildChartData(
-  List<SymptomData> symptomData,
-  List<dynamic> slipups,
-  String Function(String) formatToDayMonth,
-) {
-  return [
-    charts.Series<SymptomData, String>(
-      id: 'Objawy',
-      colorFn: (SymptomData symptoms, __) => slipups.contains(symptoms.date)
-          ? charts.ColorUtil.fromDartColor(const Color.fromARGB(255, 223, 2, 2))
-          : charts.ColorUtil.fromDartColor(Colors.blueGrey),
-
-      labelAccessorFn: (SymptomData symptoms, __) =>
-          slipups.contains(symptoms.date) ? 'Z' : '',
-      domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-      measureFn: (SymptomData symptoms, _) => symptoms.symptomCount,
-      data: symptomData,
-    ),
-    charts.Series<SymptomData, String>(
-      id: 'Emocje -',
-      colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-      domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-      measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
-      data: symptomData,
-    )
-      ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
-      ..setAttribute(charts.rendererIdKey, 'secondary'),
-    charts.Series<SymptomData, String>(
-      id: 'Emocje +',
-      colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-      domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-      measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
-      data: symptomData,
-    )
-      ..setAttribute(charts.measureAxisIdKey, 'secondaryMeasureAxis')
-      ..setAttribute(charts.rendererIdKey, 'secondary'),
-  ];
-}
-
-
-List<charts.Series<SymptomData, String>> buildChartData2(
-  List<SymptomData> symptomData,
-  String Function(String) formatToDayMonth,
-) {
-  return [
-    charts.Series<SymptomData, String>(
-            id: 'Emocje -',
-            seriesCategory: 'A',
-            colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
-            data: symptomData,
+class ChartDataBuilder {
+  static List<BarChartGroupData> buildChartData(
+    List<SymptomData> symptomData,
+    List<dynamic> slipups,
+    String Function(String) formatToDayMonth,
+  ) {
+    return symptomData.asMap().entries.map((entry) {
+      int index = entry.key;
+      SymptomData data = entry.value;
+      
+      bool hasSlipup = slipups.contains(data.date);
+      
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: data.symptomCount.toDouble(),
+            color: hasSlipup 
+                ? const Color.fromARGB(255, 223, 2, 2)
+                : Colors.blueGrey,
+            width: 8,
+            borderRadius: BorderRadius.circular(4),
           ),
-          // charts.Series<SymptomData, String>(
-          //   id: 'Emocje +',
-          //   seriesCategory: 'A',
-          //   colorFn: (_, __) => charts.MaterialPalette.gray.shadeDefault,
-          //   domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-          //   measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
-          //   data: symptomData,
-          // ),
+        ],
+      );
+    }).toList();
+  }
 
-          charts.Series<SymptomData, String>(
-            id: 'Emocje +',
-            seriesCategory: 'B',
-            colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-            domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-            measureFn: (SymptomData symptoms, _) => symptoms.plusEmoCount,
-            data: symptomData,
-          ), 
-          // charts.Series<SymptomData, String>(
-          //   id: 'Emocje -',
-          //   seriesCategory: 'B',
-          //   colorFn: (_, __) => charts.MaterialPalette.gray.shadeDefault,
-          //   domainFn: (SymptomData symptoms, _) => formatToDayMonth(symptoms.date),
-          //   measureFn: (SymptomData symptoms, _) => symptoms.minusEmoCount,
-          //   data: symptomData,
-          // ),
-  ];
+  static List<LineChartBarData> buildLineData(
+    List<SymptomData> symptomData,
+    String Function(String) formatToDayMonth,
+  ) {
+    List<FlSpot> minusEmoSpots = symptomData.asMap().entries.map((entry) {
+      return FlSpot(entry.key.toDouble(), entry.value.minusEmoCount.toDouble());
+    }).toList();
+
+    List<FlSpot> plusEmoSpots = symptomData.asMap().entries.map((entry) {
+      return FlSpot(entry.key.toDouble(), entry.value.plusEmoCount.toDouble());
+    }).toList();
+
+    return [
+      LineChartBarData(
+        spots: minusEmoSpots,
+        isCurved: true,
+        color: Colors.red,
+        barWidth: 1,
+        dotData: const FlDotData(show: false),
+        belowBarData: BarAreaData(
+          show: true,
+          color: Colors.red.withOpacity(0.2),
+        ),
+      ),
+      LineChartBarData(
+        spots: plusEmoSpots,
+        isCurved: true,
+        color: Colors.green,
+        barWidth: 1,
+        dotData: const FlDotData(show: false),
+        belowBarData: BarAreaData(
+          show: true,
+          color: Colors.green.withOpacity(0.2),
+        ),
+      ),
+    ];
+  }
+
+  static List<BarChartGroupData> buildChartData2(
+    List<SymptomData> symptomData,
+    String Function(String) formatToDayMonth,
+  ) {
+    return symptomData.asMap().entries.map((entry) {
+      int index = entry.key;
+      SymptomData data = entry.value;
+      
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: data.minusEmoCount.toDouble(),
+            color: Colors.red,
+            width: 4,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          BarChartRodData(
+            toY: data.plusEmoCount.toDouble(),
+            color: Colors.green,
+            width: 4,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
+  static List<String> getBottomTitles(List<SymptomData> symptomData, String Function(String) formatToDayMonth) {
+    return symptomData.map((data) => formatToDayMonth(data.date)).toList();
+  }
 }
 class SymptomData {
   final String date;
