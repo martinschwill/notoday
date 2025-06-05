@@ -65,8 +65,11 @@ class _HomePageState extends State<HomePage> {
         }
       }
     }); 
-   
     
+    // Check for notifications after a short delay to ensure context is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NavigationService.handleNotificationNavigation(context);
+    });
   }
 
   void _showSobrietyPopup() {
