@@ -234,7 +234,7 @@ class _DailyPageState extends State<DailyPage> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Wysyłam...'),
-                        content: const Text('Na pewno nie chcesz nic zaznaczyć?'),
+                        content: const Text('Ale pewno nie chcesz nic zaznaczyć?'),
                         actions: [
                           // Cancel Button
                           TextButton(

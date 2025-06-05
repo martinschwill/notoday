@@ -150,7 +150,8 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    showDialog(
+    if (isFirstTime) {
+          showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -202,6 +203,7 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+    }
 }
 
   @override
