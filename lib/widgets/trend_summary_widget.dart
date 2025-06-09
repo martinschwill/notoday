@@ -72,14 +72,23 @@ class TrendSummaryWidget extends StatelessWidget {
   
   Widget _buildTrendIndicator(String label, TrendAnalysis trend, Color baseColor, {bool invertColors = false}) {
     // Determine colors based on trend direction and inversion setting
-    Color arrowColor;
-    if (trend.direction == "upward") {
-      arrowColor = invertColors ? Colors.green : Colors.red;
-    } else if (trend.direction == "downward") {
-      arrowColor = invertColors ? Colors.red : Colors.green;
+    Color upColor;
+    Color downColor;
+    
+    if (invertColors) {
+      // For positive emotions: up is good (green), down is bad (red)
+      // For negative emotions: up is bad (red), down is good (green)
+      upColor = label.contains("-") ? Colors.red : Colors.green;
+      downColor = label.contains("-") ? Colors.green : Colors.red;
     } else {
-      arrowColor = Colors.grey;
+      // Normal color scheme: up is bad (red), down is good (green)
+      upColor = Colors.red;
+      downColor = Colors.green;
     }
+    
+    // Grey for stable trends
+    Color arrowColor = trend.direction == "stable" ? Colors.grey : 
+                       (trend.direction == "upward" ? upColor : downColor);
     
     return Column(
       children: [
@@ -94,8 +103,8 @@ class TrendSummaryWidget extends StatelessWidget {
         TrendIndicator(
           trend: trend.direction,
           size: 28,
-          upColor: arrowColor,
-          downColor: invertColors ? Colors.red : Colors.green,
+          upColor: upColor,
+          downColor: downColor,
         ),
         const SizedBox(height: 4),
         Text(

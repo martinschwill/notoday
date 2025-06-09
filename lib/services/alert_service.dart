@@ -172,7 +172,7 @@ class AlertService {
   }
   
   /// Create a test notification alert (only for development/testing)
-  Future<void> createTestAlert({Duration delay = const Duration(hours: 1)}) async {
+  Future<void> createTestAlert({Duration delay = const Duration(seconds: 10)}) async {
     final testAlert = Alert(
       id: "test_${DateTime.now().millisecondsSinceEpoch}",
       title: "Alert testowy",

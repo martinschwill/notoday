@@ -183,53 +183,76 @@ class _AnalyzePageState extends State<AnalyzePage> {
       int index = entry.key;
       SymptomData data = entry.value;
       bool isSelected = index == selectedIndex;
+      List<BarChartRodData> rods = [];
+      
+      // Define colors
+      final positiveColor = isSelected 
+        ? const Color.fromARGB(255, 63, 145, 66).withOpacity(1)
+        : const Color.fromARGB(255, 63, 145, 66).withOpacity(0.7);
+        
+      final negativeColor = isSelected 
+        ? const Color.fromARGB(255, 222, 54, 42).withOpacity(1)
+        : const Color.fromARGB(255, 222, 54, 42).withOpacity(0.7);
+      
+      // Add positive emotions rod (if any)
+      if (data.plusEmoCount > 0) {
+        rods.add(BarChartRodData(
+          toY: data.plusEmoCount.toDouble(),
+          color: positiveColor,
+          width: isSelected ? 16 : 12,
+          borderRadius: data.minusEmoCount > 0 
+            ? const BorderRadius.only(
+                bottomLeft: Radius.circular(4),
+                bottomRight: Radius.circular(4),
+              )
+            : BorderRadius.circular(4),
+          backDrawRodData: isSelected
+            ? BackgroundBarChartRodData(
+                show: true,
+                toY: (_getMaxY(_chartData2) * 0.05).round().toDouble(),
+                color: Colors.green.withOpacity(0.1),
+              )
+            : null,
+        ));
+      }
+      
+      // Add negative emotions rod (if any)
+      if (data.minusEmoCount > 0) {
+        rods.add(BarChartRodData(
+          toY: data.minusEmoCount.toDouble(),
+          fromY: data.plusEmoCount.toDouble(), // Start from where positive emotions end
+          color: negativeColor,
+          width: isSelected ? 16 : 12,
+          borderRadius: data.plusEmoCount > 0
+            ? const BorderRadius.only(
+                topLeft: Radius.circular(4),
+                topRight: Radius.circular(4),
+              )
+            : BorderRadius.circular(4),
+          backDrawRodData: isSelected
+            ? BackgroundBarChartRodData(
+                show: true,
+                toY: (_getMaxY(_chartData2) * 0.05).round().toDouble(),
+                color: Colors.red.withOpacity(0.1),
+              )
+            : null,
+        ));
+      }
+      
+      // If both counts are 0, add a transparent rod to show the position
+      if (data.plusEmoCount == 0 && data.minusEmoCount == 0) {
+        rods.add(BarChartRodData(
+          toY: 0.1, // Just a small value to make it visible
+          color: Colors.grey.withOpacity(0.3),
+          width: isSelected ? 16 : 12,
+          borderRadius: BorderRadius.circular(4),
+        ));
+      }
       
       return BarChartGroupData(
         x: index,
-        groupVertically: true, // Stack bars vertically
-        barRods: [
-          // Positive emotions first (bottom stack)
-          BarChartRodData(
-            toY: data.plusEmoCount.toDouble(),
-            color: isSelected 
-              ? const Color.fromARGB(255, 63, 145, 66).withOpacity(1)
-              : const Color.fromARGB(255, 63, 145, 66).withOpacity(0.7),
-            width: isSelected ? 16 : 12, // Wider bar for stacked display
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(4),
-              topRight: Radius.circular(4),
-            ),
-            backDrawRodData: isSelected
-              ? BackgroundBarChartRodData(
-                  show: true,
-                  toY: (_getMaxY(_chartData2) * 0.05).round().toDouble(),
-                  color: Colors.green.withOpacity(0.1),
-                )
-              : null,
-          ),
-          // Negative emotions on top of positive (top stack)
-          BarChartRodData(
-            toY: data.minusEmoCount.toDouble(),
-            fromY: data.plusEmoCount.toDouble(), // Start from where positive emotions end
-            color: isSelected 
-              ? const Color.fromARGB(255, 222, 54, 42).withOpacity(1)
-              : const Color.fromARGB(255, 222, 54, 42).withOpacity(0.7),
-            width: isSelected ? 16 : 12, // Wider bar for stacked display
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(4),
-              bottomRight: Radius.circular(4),
-              topLeft: Radius.circular(4),
-              topRight: Radius.circular(4),
-            ),
-            backDrawRodData: isSelected
-              ? BackgroundBarChartRodData(
-                  show: true,
-                  toY: (_getMaxY(_chartData2) * 0.05).round().toDouble(),
-                  color: Colors.red.withOpacity(0.1),
-                )
-              : null,
-          ),
-        ],
+        groupVertically: true,
+        barRods: rods,
       );
     }).toList();
   }
