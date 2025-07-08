@@ -41,6 +41,9 @@ class Alert {
   /// Optional action to take when alert is tapped
   final VoidCallback? onTap;
   
+  /// Has this alert been seen by the user
+  final bool seen;
+  
   /// Constructor
   Alert({
     required this.id,
@@ -50,6 +53,7 @@ class Alert {
     required this.type,
     DateTime? createdAt,
     this.onTap,
+    this.seen = false,
   }) : createdAt = createdAt ?? DateTime.now();
   
   /// Factory method to create an alert from a TrendAnalysis
@@ -62,9 +66,9 @@ class Alert {
   }) {
     AlertSeverity severity;
     
-    if (trend.percentChange.abs() > 20) {
+    if (trend.percentChange.abs() > 2) {
       severity = AlertSeverity.critical;
-    } else if (trend.percentChange.abs() > 10) {
+    } else if (trend.percentChange.abs() > 1) {
       severity = AlertSeverity.warning;
     } else {
       severity = AlertSeverity.info;
@@ -77,6 +81,7 @@ class Alert {
       severity: severity,
       type: type,
       onTap: onTap,
+      seen: false,
     );
   }
   
@@ -110,6 +115,7 @@ class Alert {
       severity: severity,
       type: AlertType.inactivity,
       onTap: onTap,
+      seen: false,
     );
   }
   
@@ -132,9 +138,9 @@ class Alert {
     ].reduce((max, value) => value > max ? value : max);
     
     AlertSeverity severity;
-    if (worstChange > 20) {
+    if (worstChange > 2) {
       severity = AlertSeverity.critical;
-    } else if (worstChange > 10) {
+    } else if (worstChange > 1) {
       severity = AlertSeverity.warning;
     } else {
       severity = AlertSeverity.info;
@@ -147,23 +153,24 @@ class Alert {
       severity: severity,
       type: AlertType.combined,
       onTap: onTap,
+      seen: false,
     );
   }
 }
 
 class Alerting {
   /// Thresholds for basic checks
-  static const double highSymptomThreshold = 7.0;
-  static const double highNegEmotionThreshold = 7.0;
-  static const double lowPosEmotionThreshold = 3.0;
+  static const double highSymptomThreshold = 3.0;
+  static const double highNegEmotionThreshold = 3.0;
+  static const double lowPosEmotionThreshold = 1.0;
   
   /// Days without activity that trigger alerts
   static const int moderateInactivityDays = 3;
   static const int severeInactivityDays = 7;
   
   /// Trend percentage changes that trigger alerts
-  static const double moderateTrendChange = 10.0;
-  static const double severeTrendChange = 20.0;
+  static const double moderateTrendChange = 1.0;
+  static const double severeTrendChange = 5.0;
   
   /// Checks if the given value is above the threshold
   static bool isAboveThreshold(double value, double threshold) {
@@ -254,14 +261,18 @@ class Alerting {
     final posEmotionsTrend = analyzeTrend(posEmotionsData, daysRange);
     final negEmotionsTrend = analyzeTrend(negEmotionsData, daysRange);
     
-    // Check if all three metrics show concerning trends:
+    // DEVELOPMENT MODE: For easier testing, only require any one concerning trend
+    // In production, would check all three metrics:
     // 1. Symptoms going up (bad)
     // 2. Positive emotions going down (bad)
     // 3. Negative emotions going up (bad)
-    bool allTrendsConcerning = 
-      symptomsTrend.direction == "upward" && symptomsTrend.percentChange > 5.0 &&
-      posEmotionsTrend.direction == "downward" && posEmotionsTrend.percentChange < -5.0 &&
-      negEmotionsTrend.direction == "upward" && negEmotionsTrend.percentChange > 5.0;
+    bool anyTrendConcerning = 
+      (symptomsTrend.direction == "upward" && symptomsTrend.percentChange > 1.0) ||
+      (posEmotionsTrend.direction == "downward" && posEmotionsTrend.percentChange < -1.0) ||
+      (negEmotionsTrend.direction == "upward" && negEmotionsTrend.percentChange > 1.0);
+      
+    // Use relaxed criteria for development purposes
+    bool allTrendsConcerning = anyTrendConcerning;
     
     if (allTrendsConcerning) {
       return Alert.combinedMetrics(
@@ -282,17 +293,68 @@ class Alerting {
     required DateTime lastActivityDate,
     required int daysRange,
   }) {
+    debugPrint('Generating alerts with data lengths: ' +
+        'symptoms=${symptomsData.length}, ' +
+        'posEmotions=${posEmotionsData.length}, ' +
+        'negEmotions=${negEmotionsData.length}, ' +
+        'daysRange=$daysRange');
+    
+    // Generate a unique ID suffix to avoid duplicates within the same run
+    final uniqueIdSuffix = "_${DateTime.now().millisecondsSinceEpoch}";
+        
     List<Alert> alerts = [];
     
     // Check individual trend alerts
     final symptomsAlert = checkSymptomsTrend(symptomsData, daysRange);
-    if (symptomsAlert != null) alerts.add(symptomsAlert);
+    if (symptomsAlert != null) {
+      // Add unique suffix to ID to prevent duplicates
+      final uniqueAlert = Alert(
+        id: "${symptomsAlert.id}$uniqueIdSuffix",
+        title: symptomsAlert.title,
+        description: symptomsAlert.description,
+        severity: symptomsAlert.severity,
+        type: symptomsAlert.type,
+        createdAt: symptomsAlert.createdAt,
+        onTap: symptomsAlert.onTap,
+        seen: false,
+      );
+      debugPrint('Generated symptoms alert with severity: ${uniqueAlert.severity}');
+      alerts.add(uniqueAlert);
+    }
     
     final posEmotionsAlert = checkPositiveEmotionsTrend(posEmotionsData, daysRange);
-    if (posEmotionsAlert != null) alerts.add(posEmotionsAlert);
+    if (posEmotionsAlert != null) {
+      // Add unique suffix to ID to prevent duplicates
+      final uniqueAlert = Alert(
+        id: "${posEmotionsAlert.id}$uniqueIdSuffix",
+        title: posEmotionsAlert.title,
+        description: posEmotionsAlert.description,
+        severity: posEmotionsAlert.severity,
+        type: posEmotionsAlert.type,
+        createdAt: posEmotionsAlert.createdAt,
+        onTap: posEmotionsAlert.onTap,
+        seen: false,
+      );
+      debugPrint('Generated positive emotions alert with severity: ${uniqueAlert.severity}');
+      alerts.add(uniqueAlert);
+    }
     
     final negEmotionsAlert = checkNegativeEmotionsTrend(negEmotionsData, daysRange);
-    if (negEmotionsAlert != null) alerts.add(negEmotionsAlert);
+    if (negEmotionsAlert != null) {
+      // Add unique suffix to ID to prevent duplicates
+      final uniqueAlert = Alert(
+        id: "${negEmotionsAlert.id}$uniqueIdSuffix",
+        title: negEmotionsAlert.title,
+        description: negEmotionsAlert.description,
+        severity: negEmotionsAlert.severity,
+        type: negEmotionsAlert.type,
+        createdAt: negEmotionsAlert.createdAt,
+        onTap: negEmotionsAlert.onTap,
+        seen: false,
+      );
+      debugPrint('Generated negative emotions alert with severity: ${uniqueAlert.severity}');
+      alerts.add(uniqueAlert);
+    }
     
     // Check combined trends alert - this is highest priority
     final combinedAlert = checkCombinedTrends(
@@ -301,15 +363,44 @@ class Alerting {
       negEmotionsData, 
       daysRange
     );
-    if (combinedAlert != null) alerts.add(combinedAlert);
+    if (combinedAlert != null) {
+      // Add unique suffix to ID to prevent duplicates
+      final uniqueAlert = Alert(
+        id: "${combinedAlert.id}$uniqueIdSuffix",
+        title: combinedAlert.title,
+        description: combinedAlert.description,
+        severity: combinedAlert.severity,
+        type: combinedAlert.type,
+        createdAt: combinedAlert.createdAt,
+        onTap: combinedAlert.onTap,
+        seen: false,
+      );
+      debugPrint('Generated combined alert with severity: ${uniqueAlert.severity}');
+      alerts.add(uniqueAlert);
+    }
     
     // Check inactivity alert
     final inactivityAlert = checkUserInactivity(lastActivityDate);
-    if (inactivityAlert != null) alerts.add(inactivityAlert);
+    if (inactivityAlert != null) {
+      // Add unique suffix to ID to prevent duplicates
+      final uniqueAlert = Alert(
+        id: "${inactivityAlert.id}$uniqueIdSuffix",
+        title: inactivityAlert.title,
+        description: inactivityAlert.description,
+        severity: inactivityAlert.severity,
+        type: inactivityAlert.type,
+        createdAt: inactivityAlert.createdAt,
+        onTap: inactivityAlert.onTap,
+        seen: false,
+      );
+      debugPrint('Generated inactivity alert with severity: ${uniqueAlert.severity}');
+      alerts.add(uniqueAlert);
+    }
     
     // Sort alerts by severity (critical first)
     alerts.sort((a, b) => b.severity.index.compareTo(a.severity.index));
     
+    debugPrint('Total alerts generated: ${alerts.length}');
     return alerts;
   }
 }

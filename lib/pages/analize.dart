@@ -1,4 +1,5 @@
 // filepath: /Users/martinschwill/Projects/Notoday/notoday/lib/pages/analize.dart
+import 'dart:async' show unawaited; // For ignoring futures
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:convert';
@@ -8,13 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../common_imports.dart'; 
 import '../widgets/trend_indicator.dart';
 import '../widgets/trend_summary_widget.dart';
-import '../modules/analytics.dart';
 
 class AnalyzePage extends StatefulWidget {
   final int userId;
   final String userName; // Add this line to accept userName
+  final int? daysSinceSober; // Optional parameter for days since sober
 
-  const AnalyzePage({super.key, required this.userId, required this.userName});
+  const AnalyzePage({super.key, required this.userId, required this.userName, this.daysSinceSober});
 
   @override
   State<AnalyzePage> createState() => _AnalyzePageState();
@@ -29,7 +30,7 @@ class _AnalyzePageState extends State<AnalyzePage> {
   List<dynamic> _slipups = []; 
   List<SymptomData> symptomData = [];
   bool _isLoading = true;
-  int _daysRange = 30; // Default to 30 days
+  int _daysRange = 30; // Will be set in initState
   int _selectedDayIndex = -1; // Index of selected day, -1 means no selection
 
   // Added structure to hold emotion totals
@@ -39,6 +40,10 @@ class _AnalyzePageState extends State<AnalyzePage> {
   @override
   void initState() {
     super.initState();
+    // Set days range from widget parameter if provided
+    if (widget.daysSinceSober != null) {
+      _daysRange = widget.daysSinceSober!;
+    }
     _loadUserSlipups(); 
     _fetchUserSymptoms();
   }
@@ -219,7 +224,7 @@ class _AnalyzePageState extends State<AnalyzePage> {
       // Add negative emotions rod (if any)
       if (data.minusEmoCount > 0) {
         rods.add(BarChartRodData(
-          toY: data.minusEmoCount.toDouble(),
+          toY: data.plusEmoCount.toDouble() + data.minusEmoCount.toDouble(), // Total height from bottom
           fromY: data.plusEmoCount.toDouble(), // Start from where positive emotions end
           color: negativeColor,
           width: isSelected ? 16 : 12,
@@ -1066,7 +1071,63 @@ Future<List<SymptomData>> _getRawSymptomData() async {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () {
+                                    onPressed: () async {
+                                      // Start spinner to indicate work is being done
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                      
+                                      try {
+                                        // Save data to UserMetricsService first
+                                        final metricsService = UserMetricsService();
+                                        
+                                        // Save all data in parallel for speed
+                                        await Future.wait([
+                                          metricsService.saveSymptoms(symptomsRaw),
+                                          metricsService.savePosEmotions(emoPlusRaw),
+                                          metricsService.saveNegEmotions(emoMinusRaw),
+                                        ]);
+                                        
+                                        debugPrint('Saved data to UserMetricsService: ' +
+                                          'symptoms=${symptomsRaw.length}, ' +
+                                          'posEmotions=${emoPlusRaw.length}, ' +
+                                          'negEmotions=${emoMinusRaw.length}');
+                                        
+                                        // Close loading dialog
+                                        Navigator.of(context).pop();
+                                        
+                                        // Close analysis result dialog
+                                        Navigator.of(context).pop();
+                                        
+                                        // Show success message immediately
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Dane zapisane poprawnie'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                        
+                                        // Run alert checks in the background - don't wait for it
+                                        // and don't try to update UI after navigation
+                                        unawaited(metricsService.runAlertChecks(showNotifications: true));
+                                      } catch (e) {
+                                        // Close loading dialog in case of error
+                                        Navigator.of(context).pop();
+                                        
+                                        // Show error
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Błąd: $e'),
+                                            backgroundColor: Colors.red,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                      
                                       Navigator.of(context).pop(); // Close the dialog
                                     },
                                     child: const Text('OK'),

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../common_imports.dart'; 
+import '../common_imports.dart';
 
 class HomePage extends StatefulWidget {
   final int userId;
@@ -50,10 +50,17 @@ class _HomePageState extends State<HomePage> {
   }
 
 
+  // Notification service to manage app badge
+  final NotificationService _notificationService = NotificationService();
+
   @override
   void initState() {
     super.initState();
     _fetchDaysSinceSober(); // Fetch the number of days when the widget is initialized
+    
+    // Clear app icon badge when the app is opened
+    _notificationService.resetBadgeOnAppOpen();
+    
     _isFirstRun().then((firstTime){ // check if it's the first run
       if(firstTime) { 
         _showDatePickerPopup();  // if yes show datepicker to setup first dates 
@@ -153,7 +160,7 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    if (isFirstTime) {
+    if (!isFirstTime) {
           showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -244,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                          Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName),
+                          builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName, daysSinceSober: daysSinceSober),
                         ),
                       );
                       },

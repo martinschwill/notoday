@@ -19,6 +19,14 @@ class _AlertsPageState extends State<AlertsPage> {
     
     // Listen for changes in alerts
     _alertService.alertsNotifier.addListener(_onAlertsChanged);
+    
+    // Clear badge when alerts are viewed
+    _markAlertsAsSeen();
+  }
+  
+  Future<void> _markAlertsAsSeen() async {
+    // Clear the badge notification from app icon when alerts are viewed
+    await _alertService.markAlertsAsSeen();
   }
   
   @override

@@ -111,10 +111,17 @@ class UserMetricsService {
   /// Run checks for alerts based on all available data
   Future<List<Alert>> runAlertChecks({bool showNotifications = true}) async {
     try {
+      debugPrint('Running alert checks with showNotifications=$showNotifications');
+      
       final symptomsData = await getSymptoms();
       final posEmotionsData = await getPosEmotions();
       final negEmotionsData = await getNegEmotions();
       final lastActivityDate = await getLastActivityDate();
+      
+      debugPrint('Data retrieved: ' +
+          'symptoms=${symptomsData.length}, ' +
+          'posEmotions=${posEmotionsData.length}, ' +
+          'negEmotions=${negEmotionsData.length}');
       
       // Default to 30 days or available data length
       int daysRange = 30;
@@ -122,12 +129,20 @@ class UserMetricsService {
         daysRange = symptomsData.length;
       }
       
-      if (daysRange < 7) {
-        // Not enough data for meaningful trend analysis
+      if (daysRange < 7 && (symptomsData.isEmpty || posEmotionsData.isEmpty || negEmotionsData.isEmpty)) {
+        debugPrint('Not enough data for trend analysis. Need at least 7 days of data.');
+        // If we're missing data, create a test alert for debugging purposes
+        if (showNotifications) {
+          debugPrint('Creating test alert instead since data is missing');
+          await AlertService().createTestAlert(delay: const Duration(seconds: 5));
+        }
         return [];
       }
       
       // Use the alert service to generate alerts
+      // Add a small delay to avoid running multiple checks at virtually the same time
+      await Future.delayed(const Duration(milliseconds: 500));
+      
       final alertService = AlertService();
       final newAlerts = await alertService.checkAndGenerateAlerts(
         symptomsData: symptomsData,
@@ -138,6 +153,7 @@ class UserMetricsService {
         showNotifications: showNotifications,
       );
       
+      debugPrint('Generated ${newAlerts.length} alerts from metrics data');
       return newAlerts;
     } catch (e) {
       debugPrint('Error running alert checks: $e');

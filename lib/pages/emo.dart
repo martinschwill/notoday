@@ -291,7 +291,7 @@ class _EmoPageState extends State<EmoPage> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Dzień zapisany'),
-                                    content: const Text('Emocje zapisane! Iść do symptomów?'),
+                                    content: const Text('Emocje zapisane! Iść do analizy?'),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
@@ -304,7 +304,7 @@ class _EmoPageState extends State<EmoPage> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => DailyPage(userId: widget.userId, userName: widget.userName),
+                                              builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName),
                                             ),
                                           );
                                         },

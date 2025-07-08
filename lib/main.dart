@@ -17,23 +17,33 @@ void main() async {
   tz.initializeTimeZones(); // Initialize timezone data
   
   try {
-    // Initialize the AlertService
+    debugPrint('Initializing app services...');
+    
+    // Initialize the AlertService (which also initializes NotificationService)
     final alertService = AlertService();
     await alertService.initialize();
     
-    // Initialize the NotificationService
-    final notificationService = NotificationService();
-    await notificationService.initialize(
+    // Re-initialize with our callback
+    await NotificationService().initialize(
       onNotificationTapped: (alertId) {
         debugPrint('Notification tapped: $alertId');
         // Store the alert ID for later use when app is opened
         _storeNotificationAlertId(alertId);
+        
+        // Also immediately clear badges
+        alertService.markAlertsAsSeen();
       },
     );
     
-    // Initialize the UserMetricsService and run initial alert checks
+    // Initialize the UserMetricsService but don't run alert checks
+    // (we'll do that after the app is fully loaded)
     final metricsService = UserMetricsService();
-    await metricsService.runAlertChecks(showNotifications: true);
+    
+    // Wait a bit to ensure we don't have duplicate notifications at startup
+    Future.delayed(const Duration(seconds: 2), () async {
+      debugPrint('Running delayed alert checks after app initialization');
+      await metricsService.runAlertChecks(showNotifications: true);
+    });
   } catch (e) {
     debugPrint('Error initializing services: $e');
   }

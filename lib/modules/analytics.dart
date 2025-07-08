@@ -45,7 +45,7 @@ String symptomTrend(List<int> dailySymptoms, int days) {
   if (recent.length < 4) return "stable"; // Need at least 4 data points
   
   // Calculate exponential moving averages
-  double alpha = 0.3; // Smoothing factor (higher value = more weight to recent observations)
+  double alpha = 0.4; // Smoothing factor (higher value = more weight to recent observations)
   
   // Calculate short-term EMA (last week or min 7 values)
   int shortTermLength = days > 14 ? 7 : (days ~/ 2);

@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
     
-    // Create the test alert with notification
+    // Create the test alert using AlertService's existing method
     await _alertService.createTestAlert(delay: const Duration(seconds: 10));
     
     // Show confirmation
@@ -105,6 +105,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 context,
                 MaterialPageRoute(builder: (context) => const AlertsPage()),
               );
+            },
+          ),
+          
+          // Test notifications button
+          ListTile(
+            title: const Text('Testuj powiadomienia'),
+            subtitle: const Text('Sprawdź, czy powiadomienia działają na tym urządzeniu'),
+            leading: const Icon(Icons.notification_important),
+            onTap: () async {
+              // Use createTestAlert directly since it has all the functionality we need
+              await _createTestAlert();
             },
           ),
           

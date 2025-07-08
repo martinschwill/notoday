@@ -57,6 +57,8 @@
 		</array>
 		<key>NSUserNotificationUsageDescription</key>
 		<string>We use notifications to remind you about your daily tasks.</string>
+		<key>NSLocalNotificationsUsageDescription</key>
+		<string>We need to send you alerts about important health trends.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>
