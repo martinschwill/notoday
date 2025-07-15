@@ -112,7 +112,7 @@ class TrendSummaryWidget extends StatelessWidget {
           style: TextStyle(
             color: trend.isSignificant ? arrowColor : Colors.grey,
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: trend.isSignificant ? 14 : 12,
           ),
         ),
       ],

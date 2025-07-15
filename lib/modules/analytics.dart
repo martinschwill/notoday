@@ -30,7 +30,12 @@ class Analytics {
 
 double averageOfSymptoms(List<int> dailySymptoms, int days) {
   if (dailySymptoms.isEmpty) return 0;
-  final recent = dailySymptoms.reversed.take(days).toList(); 
+  
+  // Take the most recent 'days' data points
+  final recent = dailySymptoms.length > days 
+      ? dailySymptoms.sublist(dailySymptoms.length - days)
+      : dailySymptoms;
+  
   if (recent.isEmpty) return 0;
   final sum = recent.reduce((a, b) => a + b);
   return sum / recent.length;
@@ -41,10 +46,16 @@ double averageOfSymptoms(List<int> dailySymptoms, int days) {
 /// Uses an exponential moving average approach that gives more weight to recent data
 /// and is less sensitive to outliers.
 String symptomTrend(List<int> dailySymptoms, int days) {
-  final recent = dailySymptoms.take(days).toList();
+  // Take the most recent 'days' data points (from the end of the list)
+  final recent = dailySymptoms.length > days 
+      ? dailySymptoms.sublist(dailySymptoms.length - days)
+      : dailySymptoms;
+  
   if (recent.length < 4) return "stable"; // Need at least 4 data points
   
   // Calculate exponential moving averages
+  // Alpha = 0.4 gives reasonable balance: recent data has influence but not too sensitive to single outliers
+  // For daily health data, this means roughly 60% weight to historical trend, 40% to new data
   double alpha = 0.4; // Smoothing factor (higher value = more weight to recent observations)
   
   // Calculate short-term EMA (last week or min 7 values)
@@ -54,7 +65,7 @@ String symptomTrend(List<int> dailySymptoms, int days) {
       ? recent.sublist(recent.length - shortTermLength)
       : recent;
   
-  // Calculate long-term EMA (all available data)
+  // Calculate long-term EMA (all available recent data)
   List<int> longTermData = recent;
 
   double shortTermEMA = _calculateEMA(shortTermData, alpha);
@@ -66,20 +77,25 @@ String symptomTrend(List<int> dailySymptoms, int days) {
   double relativeChange = (shortTermEMA - longTermEMA) / longTermEMA;
   
   // Use more sensitive thresholds for better trend detection
+  // 0.6% change threshold means we detect trends when short-term is 0.6% different from long-term
   if (relativeChange > 0.006) return "upward";
   if (relativeChange < -0.006) return "downward";
   return "stable";
 }
 
 /// Calculate Exponential Moving Average with given smoothing factor alpha
+/// Assumes data is ordered from oldest to newest (chronological order)
+/// Recent data gets higher weight due to the exponential nature
 double _calculateEMA(List<int> data, double alpha) {
   if (data.isEmpty) return 0;
+  if (data.length == 1) return data[0].toDouble();
   
-  // Start with simple average for first value
-  double ema = data[0].toDouble();
+  // Start with simple moving average of first few points for better initialization
+  int initWindow = (data.length * 0.2).ceil().clamp(1, 3);
+  double ema = data.take(initWindow).fold(0.0, (sum, val) => sum + val) / initWindow;
   
-  // Calculate EMA for remaining values
-  for (int i = 1; i < data.length; i++) {
+  // Calculate EMA for remaining values (starting from the initialization window)
+  for (int i = initWindow; i < data.length; i++) {
     ema = alpha * data[i] + (1 - alpha) * ema;
   }
   
@@ -114,9 +130,18 @@ TrendAnalysis analyzeTrend(List<int> values, int daysRange) {
   // Get trend direction (upward, downward, stable)
   String direction = symptomTrend(values, daysRange);
   
+  if (direction == "stable") {
+    return TrendAnalysis('stable', 0.0);
+  }
   // Calculate percentage change
   double percentChange = calculateRelativeChange(values, 3, daysRange);
   
+  // if (direction == 'stable' && percentChange.abs() >= 0.1) {
+  // direction = percentChange > 0 ? 'upward' : 'downward';
+  // }
+  if (percentChange == 0.0) {
+    return TrendAnalysis('stable', 0.0);
+  }
   return TrendAnalysis(direction, percentChange);
 }
 

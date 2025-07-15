@@ -96,12 +96,12 @@ class _AnalyzePageState extends State<AnalyzePage> {
         setState(() {
           this.symptomData = symptomData;
           
-          // Default to the most recent day (index 0 if data is sorted by date desc)
+          // Default to the most recent day
           if (symptomData.isNotEmpty) {
-            _selectedDayIndex = 0;
+            _selectedDayIndex = symptomData.length - 1; // Select the last day by default
             _selectedDayEmotions = EmotionsTotal(
-              symptomData[0].plusEmoCount, 
-              symptomData[0].minusEmoCount
+              symptomData[_selectedDayIndex].plusEmoCount, 
+              symptomData[_selectedDayIndex].minusEmoCount
             );
             _dailyEmotionsPieData = _generateDailyPieData(_selectedDayEmotions!);
           } else {
@@ -1128,7 +1128,7 @@ Future<List<SymptomData>> _getRawSymptomData() async {
                                         );
                                       }
                                       
-                                      Navigator.of(context).pop(); // Close the dialog
+                                      // Note: No additional Navigator.pop() here since we already closed both dialogs above
                                     },
                                     child: const Text('OK'),
                                   ),
