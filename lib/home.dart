@@ -283,13 +283,13 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
                 crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch buttons to full width
                 children: [
-                  // Button: Głody
+                  // Button: Dziennik
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DailyPage(userId: widget.userId, userName: widget.userName),
+                          builder: (context) => DiaryEmotionsPage(userId: widget.userId, userName: widget.userName),
                         ),
                       );
                     },
@@ -300,30 +300,10 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
-                    child: const Text('Głody'),
+                    child: const Text('Dziennik'),
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
-
-                  // Button: Emocje
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EmoPage(userId: widget.userId, userName: widget.userName),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      textStyle: const TextStyle(fontSize: 18.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                    ),
-                    child: const Text('Emocje'),
-                  ),
-                  const SizedBox(height: 20.0), // Add vertical spacing between buttons
+                  
 
                   // Button: Historia
                   ElevatedButton(

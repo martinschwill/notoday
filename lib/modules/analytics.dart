@@ -130,15 +130,15 @@ TrendAnalysis analyzeTrend(List<int> values, int daysRange) {
   // Get trend direction (upward, downward, stable)
   String direction = symptomTrend(values, daysRange);
   
-  if (direction == "stable") {
-    return TrendAnalysis('stable', 0.0);
-  }
+  // if (direction == "stable") {
+  //   return TrendAnalysis('stable', 0.0);
+  // }
   // Calculate percentage change
   double percentChange = calculateRelativeChange(values, 3, daysRange);
   
-  // if (direction == 'stable' && percentChange.abs() >= 0.1) {
-  // direction = percentChange > 0 ? 'upward' : 'downward';
-  // }
+  if (direction == 'stable' && percentChange.abs() >= 0.1) {
+  direction = percentChange > 0 ? 'upward' : 'downward';
+  }
   if (percentChange == 0.0) {
     return TrendAnalysis('stable', 0.0);
   }

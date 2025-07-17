@@ -21,6 +21,9 @@ export 'services/user_metrics_service.dart';
 export 'services/notification_service.dart';
 export 'services/navigation_service.dart';
 export 'pages/register.dart';
+export 'pages/diaryemo.dart';
+export '../widgets/symptoms_widget.dart';
+export '../widgets/emotions_widget.dart';
 
 
 String capitalizeFirst(String input) {
