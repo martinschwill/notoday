@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../common_imports.dart';
-import '../pages/alerts_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -95,6 +94,21 @@ class CustomDrawer extends StatelessWidget {
                     userName: userName,
                     userId: userId,
                   )),
+                );
+              },
+            ),
+          ),
+          SafeArea(
+            minimum: const EdgeInsets.only(left: 20, right: 20),
+            top: false,
+            bottom: false,
+            child: ListTile(
+              leading: const Icon(Icons.help),
+              title: const Text('Pomoc'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HelpPage()),
                 );
               },
             ),

@@ -305,7 +305,7 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
                   
 
-                  // Button: Historia
+                  // Button: Analiza
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -323,6 +323,27 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     child: const Text('Analiza'),
+                  ),
+                  const SizedBox(height: 20.0), // Add vertical spacing between buttons
+
+                   // Button: Przybornik
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ToolkitPage(userId: widget.userId),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      textStyle: const TextStyle(fontSize: 18.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                    ),
+                    child: const Text('Narzędzia'),
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 

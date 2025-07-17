@@ -6,6 +6,8 @@ export 'widgets/chart_data_builder.dart';
 export 'widgets/button_builder.dart';
 export 'widgets/alert_widget.dart';
 export 'widgets/alert_indicator.dart';
+export '../widgets/symptoms_widget.dart';
+export '../widgets/emotions_widget.dart';
 export 'pages/reminder.dart';
 export 'pages/daily.dart';
 export 'pages/login.dart';
@@ -22,8 +24,9 @@ export 'services/notification_service.dart';
 export 'services/navigation_service.dart';
 export 'pages/register.dart';
 export 'pages/diaryemo.dart';
-export '../widgets/symptoms_widget.dart';
-export '../widgets/emotions_widget.dart';
+export 'pages/toolkit.dart'; 
+
+export 'pages/help_page.dart';
 
 
 String capitalizeFirst(String input) {
