@@ -37,57 +37,88 @@ class _AlertIndicatorState extends State<AlertIndicator> {
   }
   
   void _updateAlertCount() {
-    setState(() {
-      _alertCount = _alertService.alerts.length;
-    });
+    if (mounted) {
+      setState(() {
+        _alertCount = _alertService.alerts.length;
+        debugPrint('Alert count updated to: $_alertCount');
+      });
+    }
   }
   
-  void _navigateToAlertsPage() {
-    Navigator.push(
+  void _navigateToAlertsPage() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AlertsPage()),
     );
+    
+    // Update alert count after returning from alerts page
+    if (mounted) {
+      debugPrint('Returning from alerts page, refreshing count...');
+      _updateAlertCount();
+    }
+  }
+  
+  /// Debug method to force immediate notification testing
+  void _debugForceImmediateNotifications() async {
+    debugPrint('=== FORCING IMMEDIATE NOTIFICATIONS ===');
+    
+    // First, check current alert count
+    debugPrint('Current alerts before: ${_alertService.alerts.length}');
+    
+    // Force creation of alerts with immediate notifications
+    await _alertService.createAndShowImmediateAlert();
+    
+    // Check alert count after
+    debugPrint('Current alerts after: ${_alertService.alerts.length}');
+    
+    // Force UI update
+    _updateAlertCount();
+    
+    debugPrint('=== END FORCE IMMEDIATE ===');
   }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      customBorder: const CircleBorder(),
-      onTap: _navigateToAlertsPage,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Icon(
-            Icons.notifications,
-            color: widget.color ?? Theme.of(context).iconTheme.color,
-            size: widget.size,
-          ),
-          if (_alertCount > 0)
-            Positioned(
-              right: -5,
-              top: -5,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
-                child: Text(
-                  _alertCount > 9 ? '9+' : _alertCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onLongPress: _debugForceImmediateNotifications, // Add debug trigger
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: _navigateToAlertsPage,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Icon(
+              Icons.notifications,
+              color: widget.color ?? Theme.of(context).iconTheme.color,
+              size: widget.size,
+            ),
+            if (_alertCount > 0)
+              Positioned(
+                right: -5,
+                top: -5,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  textAlign: TextAlign.center,
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    _alertCount > 9 ? '9+' : _alertCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

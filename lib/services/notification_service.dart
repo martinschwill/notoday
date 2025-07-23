@@ -2,6 +2,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../modules/alerting.dart';
 
 /// Service to handle showing alerts as system notifications
@@ -19,6 +21,9 @@ class NotificationService {
   
   /// Base ID for alert notifications
   static const int _notificationBaseId = 1000;
+  
+  /// Key for storing notification data
+  static const String _tappedNotificationAlertKey = 'tapped_notification_alert_id';
   
   /// Callback for when a notification is tapped
   Function(String?)? _onNotificationTapped;
@@ -40,23 +45,35 @@ class NotificationService {
   Future<bool> initialize({Function(String?)? onNotificationTapped}) async {
     _onNotificationTapped = onNotificationTapped;
     
+    // Initialize timezone data first
+    tz_data.initializeTimeZones();
+    
     // Configure platform-specific settings
     const AndroidInitializationSettings androidSettings = 
         AndroidInitializationSettings('@mipmap/ic_launcher');
         
-    const DarwinInitializationSettings iOSSettings = DarwinInitializationSettings(
+    final DarwinInitializationSettings iOSSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      requestProvisionalPermission: true,
-      requestCriticalPermission: true,
+      requestProvisionalPermission: false,
+      requestCriticalPermission: false,
       defaultPresentAlert: true,
       defaultPresentBadge: true,
       defaultPresentSound: true,
       defaultPresentBanner: true,
+      defaultPresentList: true,
+      notificationCategories: [
+        DarwinNotificationCategory(
+          'ALERT_CATEGORY',
+          actions: <DarwinNotificationAction>[
+            DarwinNotificationAction.plain('view', 'View'),
+          ],
+        ),
+      ],
     );
     
-    const InitializationSettings settings = InitializationSettings(
+    final InitializationSettings settings = InitializationSettings(
       android: androidSettings,
       iOS: iOSSettings,
     );
@@ -67,6 +84,9 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationResponse,
     );
     
+    // Create notification channel for Android
+    await _createNotificationChannel();
+    
     // Request permissions immediately
     final permissionsGranted = await requestPermissions();
     
@@ -74,12 +94,34 @@ class NotificationService {
     return success ?? false;
   }
   
+  /// Create notification channel for Android
+  Future<void> _createNotificationChannel() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+        _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    
+    if (androidPlugin != null) {
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        _channelId,
+        _channelName,
+        description: _channelDesc,
+        importance: Importance.max,
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
+      );
+      
+      await androidPlugin.createNotificationChannel(channel);
+      debugPrint('Android notification channel created');
+    }
+  }
+  
   /// Request notification permissions
   Future<bool> requestPermissions() async {
     bool permissionsGranted = false;
     
     try {
-      // iOS permissions
+      // iOS permissions - be more explicit
       final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin>();
           
@@ -88,8 +130,8 @@ class NotificationService {
           alert: true,
           badge: true,
           sound: true,
-          critical: true,
-          provisional: true,
+          critical: false,
+          provisional: false,
         );
         permissionsGranted = result ?? false;
         debugPrint('iOS notification permissions granted: $permissionsGranted');
@@ -110,8 +152,16 @@ class NotificationService {
   /// Show an alert as a notification immediately
   Future<bool> showAlertNotification(Alert alert) async {
     try {
+      // Ensure permissions first
+      final hasPermissions = await requestPermissions();
+      if (!hasPermissions) {
+        debugPrint('No notification permissions, cannot show alert');
+        return false;
+      }
+      
       final int notificationId = _notificationBaseId + alert.hashCode.abs() % 900;
       debugPrint('Showing immediate notification for alert: ${alert.id} with ID: $notificationId');
+      debugPrint('Alert details - Title: ${_getTitle(alert)}, Description: ${alert.description}');
       
       // Show notification
       await _plugin.show(
@@ -134,13 +184,8 @@ class NotificationService {
   }
   
   /// Schedule an alert notification to appear after a delay
-  Future<bool> scheduleAlertNotification(Alert alert, {Duration delay = const Duration(seconds: 5)}) async {
+  Future<bool> scheduleAlertNotification(Alert alert, {Duration delay = const Duration(minutes: 3)}) async {
     try {
-      // For very short delays, show immediately
-      if (delay.inSeconds < 2) {
-        return showAlertNotification(alert);
-      }
-      
       // Ensure permissions before scheduling
       await requestPermissions();
       
@@ -164,14 +209,7 @@ class NotificationService {
         payload: alert.id,
       );
       
-      // Verify scheduling
-      final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
-      if (iOSPlugin != null) {
-        final pendingRequests = await iOSPlugin.pendingNotificationRequests();
-        final scheduled = pendingRequests.any((request) => request.id == notificationId.toString());
-        debugPrint('Notification scheduled successfully: $scheduled (${pendingRequests.length} pending)');
-      }
-      
+      debugPrint('Notification scheduled successfully for ${delay.inMinutes} minutes from now');
       return true;
     } catch (e) {
       debugPrint('Error scheduling notification: $e');
@@ -200,26 +238,13 @@ class NotificationService {
     }
   }
   
-  /// Reset badge count to zero
+  /// Reset badge count to zero without showing a notification
   Future<void> clearBadge() async {
     try {
       final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
       if (iOSPlugin != null) {
-        // Use a simple silent notification with badge 0
-        await _plugin.show(
-          9999,
-          null, 
-          null,
-          const NotificationDetails(
-            iOS: DarwinNotificationDetails(
-              presentAlert: false,
-              presentSound: false,
-              presentBadge: true,
-              badgeNumber: 0,
-            ),
-            android: null,
-          ),
-        );
+        // Just clear the badge number directly
+        await iOSPlugin.requestPermissions(badge: true);
         debugPrint('Badge count cleared');
       }
     } catch (e) {
@@ -257,16 +282,24 @@ class NotificationService {
   /// Send a test notification to verify system is working
   Future<bool> sendTestNotification() async {
     try {
-      await requestPermissions();
+      final hasPermissions = await requestPermissions();
+      debugPrint('Test notification - permissions granted: $hasPermissions');
+      
+      if (!hasPermissions) {
+        debugPrint('Cannot send test notification - no permissions');
+        return false;
+      }
       
       final now = DateTime.now();
       final id = now.millisecondsSinceEpoch % 1000;
       
+      debugPrint('Sending test notification with ID: $id');
+      
       // Show an immediate test notification
       await _plugin.show(
         id,
-        'Test Notification',
-        'This is a test notification sent at ${now.hour}:${now.minute}:${now.second}',
+        'Test Notification - Notoday',
+        'Test powiadomienia na ekranie blokady ${now.hour}:${now.minute}:${now.second}. Jeśli to widzisz, system działa!',
         NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
@@ -275,14 +308,18 @@ class NotificationService {
             importance: Importance.max,
             priority: Priority.max,
             color: Colors.blue,
+            showWhen: true,
+            when: now.millisecondsSinceEpoch,
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
             presentBanner: true,
+            presentList: true,
             badgeNumber: 1,
             interruptionLevel: InterruptionLevel.timeSensitive,
+            sound: 'default',
           ),
         ),
         payload: 'test_notification',
@@ -336,9 +373,13 @@ class NotificationService {
       _channelName,
       channelDescription: _channelDesc,
       importance: Importance.max,
-      priority: Priority.max,
+      priority: Priority.high,
       ticker: 'Notoday Alert',
       color: color,
+      enableLights: true,
+      enableVibration: true,
+      playSound: true,
+      fullScreenIntent: alert.severity == AlertSeverity.critical,
       category: alert.severity == AlertSeverity.critical 
           ? AndroidNotificationCategory.alarm 
           : AndroidNotificationCategory.recommendation,
@@ -352,8 +393,9 @@ class NotificationService {
       presentBadge: true,
       presentSound: true,
       presentBanner: true,
+      presentList: true,
       badgeNumber: 1,
-      sound: 'default',
+      categoryIdentifier: 'ALERT_CATEGORY',
       interruptionLevel: alert.severity == AlertSeverity.critical 
           ? InterruptionLevel.timeSensitive
           : InterruptionLevel.active,
@@ -361,8 +403,15 @@ class NotificationService {
   }
   
   /// Handle notification response (when user taps on notification)
-  void _onNotificationResponse(NotificationResponse response) {
+  void _onNotificationResponse(NotificationResponse response) async {
     debugPrint('Notification tapped: ${response.payload}');
+    
+    if (response.payload != null) {
+      // Store the alert ID for navigation when app opens
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_tappedNotificationAlertKey, response.payload!);
+    }
+    
     _onNotificationTapped?.call(response.payload);
   }
   

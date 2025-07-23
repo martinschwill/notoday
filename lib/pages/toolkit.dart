@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
+
 
 import '../common_imports.dart';
 
 class ToolkitPage extends StatefulWidget {
   final int userId; 
+  final String userName;
   
-  const ToolkitPage({super.key, required this.userId});
+  const ToolkitPage({super.key, required this.userId, required this.userName});
   
   @override
   State<ToolkitPage> createState() => _ToolkitPageState();
@@ -180,7 +183,75 @@ class _ToolkitPageState extends State<ToolkitPage> {
     }
   }
 
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    // Extract number from the description
+    String cleanNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), ''); 
+    final Uri phoneUri = Uri(scheme: 'tel', path: cleanNumber);
 
+    if(await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nie można wykonać połączenia')),
+        );
+      }
+    }
+  }
+
+  Future<void> _openMaps(String location) async {
+    final Uri mapsUri = Uri(
+      scheme: 'https',
+      host: 'www.google.com',
+      path: '/maps/search/',
+      queryParameters: {
+        'api': '1',
+        'query': location,
+      },
+    );
+    
+    if (await canLaunchUrl(mapsUri)) {
+      await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nie można otworzyć map')),
+        );
+      }
+    }
+  }
+
+  void _showActionDialog(ToolkitItem item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(item.title),
+        content: Text(item.description),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleItemTap(ToolkitItem item) async {
+    switch(item.type) {
+      case 'phone': 
+        await _makePhoneCall(item.description); 
+        break; 
+      
+      case 'action': 
+        _showActionDialog(item);
+        break; 
+
+      case 'place': 
+        await _openMaps(item.description); 
+        break; 
+    }
+  }
 
   IconData _getIconForType(String type) {
     switch (type) {
@@ -221,6 +292,7 @@ class _ToolkitPageState extends State<ToolkitPage> {
       appBar: const CustomAppBar(
         title: 'NARZĘDZIA',
       ),
+      endDrawer: CustomDrawer(userName: widget.userName, userId: widget.userId), 
       body: _toolkitItems.isEmpty
           ? const Center(
               child: Text(
@@ -240,6 +312,7 @@ class _ToolkitPageState extends State<ToolkitPage> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12.0),
                   child: ListTile(
+                    onTap: () => _handleItemTap(item), // Handle tap
                     leading: CircleAvatar(
                       backgroundColor: _getColorForType(item.type),
                       child: Icon(

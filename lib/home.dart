@@ -332,7 +332,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ToolkitPage(userId: widget.userId),
+                          builder: (context) => ToolkitPage(userId: widget.userId, userName: widget.userName),
                         ),
                       );
                     },

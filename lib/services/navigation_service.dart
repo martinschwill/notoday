@@ -12,6 +12,8 @@ class NavigationService {
     final alertId = prefs.getString(_tappedNotificationAlertKey);
     
     if (alertId != null) {
+      debugPrint('Handling notification navigation for alert: $alertId');
+      
       // Clear the stored alert ID
       await prefs.remove(_tappedNotificationAlertKey);
       
@@ -23,5 +25,11 @@ class NavigationService {
         );
       }
     }
+  }
+
+  /// Check if there's a pending notification navigation
+  static Future<bool> hasPendingNotificationNavigation() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_tappedNotificationAlertKey);
   }
 }

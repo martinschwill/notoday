@@ -127,7 +127,7 @@ class Alert {
     VoidCallback? onTap,
   }) {
     const title = "Niepokojący trend";
-    const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji negatywnych oraz spadek emocji pozytywnych.";
+    const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych.";
     
     // Determine worst severity based on the most concerning trend
     double worstChange = 0;
@@ -207,7 +207,7 @@ class Alerting {
     if (trend.direction == "upward" && trend.percentChange > moderateTrendChange) {
       return Alert.fromTrend(
         title: "Wzrost objawów",
-        description: "Twoje objawy wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange dni.",
+        description: "Twoje objawy wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów.",
         trend: trend,
         type: AlertType.symptoms,
       );
@@ -223,8 +223,8 @@ class Alerting {
     // Alert on significant downward trend in positive emotions (bad)
     if (trend.direction == "downward" && trend.percentChange < -moderateTrendChange) {
       return Alert.fromTrend(
-        title: "Spadek pozytywnych emocji",
-        description: "Twoje pozytywne emocje spadły o ${trend.percentChange.abs().toStringAsFixed(1)}% w ciągu ostatnich $daysRange dni.",
+        title: "Spadek przyjemnych emocji",
+        description: "Twoje przyjemne emocje spadły o ${trend.percentChange.abs().toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów.",
         trend: trend,
         type: AlertType.positiveEmotions,
       );
@@ -240,8 +240,8 @@ class Alerting {
     // Alert on significant upward trend in negative emotions (bad)
     if (trend.direction == "upward" && trend.percentChange > moderateTrendChange) {
       return Alert.fromTrend(
-        title: "Wzrost negatywnych emocji",
-        description: "Twoje negatywne emocje wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange dni.",
+        title: "Wzrost nieprzyjemnych emocji",
+        description: "Twoje nieprzyjemne emocje wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów.",
         trend: trend,
         type: AlertType.negativeEmotions,
       );
@@ -261,18 +261,16 @@ class Alerting {
     final posEmotionsTrend = analyzeTrend(posEmotionsData, daysRange);
     final negEmotionsTrend = analyzeTrend(negEmotionsData, daysRange);
     
-    // DEVELOPMENT MODE: For easier testing, only require any one concerning trend
-    // In production, would check all three metrics:
+    // Check if ALL three trends are concerning:
     // 1. Symptoms going up (bad)
-    // 2. Positive emotions going down (bad)
+    // 2. Positive emotions going down (bad) 
     // 3. Negative emotions going up (bad)
-    bool anyTrendConcerning = 
-      (symptomsTrend.direction == "upward" && symptomsTrend.percentChange > 1.0) ||
-      (posEmotionsTrend.direction == "downward" && posEmotionsTrend.percentChange < -1.0) ||
-      (negEmotionsTrend.direction == "upward" && negEmotionsTrend.percentChange > 1.0);
-      
-    // Use relaxed criteria for development purposes
-    bool allTrendsConcerning = anyTrendConcerning;
+    bool symptomsIncreasing = symptomsTrend.direction == "upward" && symptomsTrend.percentChange > moderateTrendChange;
+    bool posEmotionsDecreasing = posEmotionsTrend.direction == "downward" && posEmotionsTrend.percentChange < -moderateTrendChange;
+    bool negEmotionsIncreasing = negEmotionsTrend.direction == "upward" && negEmotionsTrend.percentChange > moderateTrendChange;
+    
+    // Only create combined alert when ALL three conditions are met
+    bool allTrendsConcerning = symptomsIncreasing && posEmotionsDecreasing && negEmotionsIncreasing;
     
     if (allTrendsConcerning) {
       return Alert.combinedMetrics(

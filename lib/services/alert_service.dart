@@ -66,8 +66,6 @@ class AlertService {
       
       // Show notification for the alert if requested
       if (showNotification) {
-        // For combined alerts, use a short delay (30 seconds) for development
-        // Otherwise use the standard 1 hour delay
         Duration notificationDelay = const Duration(seconds: 30); 
             
         await _notificationService.scheduleAlertNotification(
@@ -96,41 +94,28 @@ class AlertService {
       alertsNotifier.value = List.from(_currentAlerts);
       await _saveAlerts();
       
-      // Schedule notifications for new alerts if requested and notifications are enabled
+      // Show notifications for new alerts if requested and notifications are enabled
       debugPrint('Scheduling notifications: showNotifications=$showNotifications, notificationsEnabled=$notificationsEnabled');
       
       if (showNotifications && notificationsEnabled) {
-        // First send a test notification to verify system
-        if (actuallyAddedAlerts.isNotEmpty) {
-          debugPrint('Sending immediate test notification for debugging');
-          await _notificationService.showTestNotification();
-        }
-        
-        // Schedule notifications for each alert with shorter delays for testing
+        // Use scheduled notifications like test notifications instead of immediate
         for (final alert in actuallyAddedAlerts) {
-          // Always notify for all alerts in debug mode
           debugPrint('Scheduling notification for alert: ${alert.id} with severity: ${alert.severity}');
           
-          // Use shorter delays for testing during development
-          Duration notificationDelay;
-          
-          if (alert.severity == AlertSeverity.critical) {
-            notificationDelay = const Duration(seconds: 5);
-          } else if (alert.type == AlertType.combined) {
-            notificationDelay = const Duration(seconds: 10);
-          } else {
-            notificationDelay = const Duration(seconds: 15);
-          }
-          
+          // Use scheduled notification with minimal delay (like test notifications)
           await _notificationService.scheduleAlertNotification(
             alert, 
-            delay: notificationDelay
+            delay: const Duration(seconds: 1) // Very short delay to trigger proper scheduling
           );
-          debugPrint('Notification scheduled for alert: ${alert.id} with ${notificationDelay.inSeconds}s delay');
+          
+          debugPrint('Notification scheduled for alert: ${alert.id} with 1sec delay');
+          
+          // Small delay between notifications to avoid overwhelming
+          await Future.delayed(const Duration(milliseconds: 200));
         }
       }
     } else {
-      debugPrint('Notifications not scheduled: showNotifications=$showNotifications, notificationsEnabled=$notificationsEnabled');
+      debugPrint('Notifications not shown: showNotifications=$showNotifications, notificationsEnabled=$notificationsEnabled');
     }
       
   }
@@ -263,7 +248,7 @@ class AlertService {
   }
   
   /// Create a test notification alert (only for development/testing)
-  Future<void> createTestAlert({Duration delay = const Duration(seconds: 5)}) async {
+  Future<void> createTestAlert({Duration delay = const Duration(seconds: 15)}) async {
     final timestamp = DateTime.now();
     final testAlert = Alert(
       id: "test_${timestamp.millisecondsSinceEpoch}",
@@ -275,7 +260,7 @@ class AlertService {
       seen: false,
     );
     
-    debugPrint('Creating test alert with delay: ${delay.inSeconds} seconds');
+    debugPrint('Creating test alert with delay: ${delay.inMinutes} minutes, ${delay.inSeconds} seconds');
     
     // Add the alert to the list
     _currentAlerts.add(testAlert);
@@ -290,18 +275,139 @@ class AlertService {
     // Force request permissions to ensure notifications can be shown
     await _notificationService.requestPermissions();
     
-    // First send an immediate test notification
-    debugPrint('Sending immediate test notification...');
-    await _notificationService.showTestNotification();
-    
-    // Then schedule the alert notification with delay
-    debugPrint('Also scheduling delayed notification...');
+    // Schedule the alert notification with proper delay
+    debugPrint('Scheduling test notification with exact delay: ${delay.toString()}');
     await _notificationService.scheduleAlertNotification(
       testAlert, 
       delay: delay
     );
     
     debugPrint('Test alert scheduled with ID: ${testAlert.id}');
+  }
+  
+  /// Generate new alerts and show them immediately (for testing real alerts)
+  Future<List<Alert>> checkAndGenerateAlertsImmediate({
+    required List<int> symptomsData,
+    required List<int> posEmotionsData,
+    required List<int> negEmotionsData,
+    required DateTime lastActivityDate,
+    required int daysRange,
+  }) async {
+    debugPrint('Running IMMEDIATE alert checks for testing');
+    
+    // Generate alerts from data
+    final newAlerts = Alerting.generateAlerts(
+      symptomsData: symptomsData,
+      posEmotionsData: posEmotionsData,
+      negEmotionsData: negEmotionsData,
+      lastActivityDate: lastActivityDate,
+      daysRange: daysRange,
+    );
+    
+    debugPrint('Generated ${newAlerts.length} new alerts for immediate display');
+    
+    // Enhanced deduplication - same as regular method
+    final List<Alert> filteredNewAlerts = [];
+    
+    for (final newAlert in newAlerts) {
+      bool isDuplicate = false;
+      
+      for (final existingAlert in _currentAlerts) {
+        if (existingAlert.id == newAlert.id) {
+          isDuplicate = true;
+          break;
+        }
+        
+        if (existingAlert.type == newAlert.type && 
+            existingAlert.severity == newAlert.severity &&
+            DateTime.now().difference(existingAlert.createdAt).inHours < 24) {
+          isDuplicate = true;
+          debugPrint('Skipping likely duplicate alert of type ${newAlert.type}');
+          break;
+        }
+      }
+      
+      if (!isDuplicate) {
+        filteredNewAlerts.add(newAlert);
+      }
+    }
+    
+    debugPrint('${filteredNewAlerts.length} alerts are unique and will be shown immediately');
+    
+    if (filteredNewAlerts.isNotEmpty) {
+      // Add alerts to list first
+      for (final alert in filteredNewAlerts) {
+        _currentAlerts.add(alert);
+      }
+      _sortAlertsByPriority();
+      alertsNotifier.value = List.from(_currentAlerts);
+      await _saveAlerts();
+      
+      // Show immediate notifications for each alert
+      for (final alert in filteredNewAlerts) {
+        debugPrint('Showing IMMEDIATE notification for real alert: ${alert.id} - ${alert.title}');
+        final result = await _notificationService.showAlertNotification(alert);
+        debugPrint('Immediate real alert notification result: $result');
+        
+        // Small delay between notifications to avoid overwhelming
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+
+    return filteredNewAlerts;
+  }
+  
+  /// Add method to convert scheduled alerts to immediate for testing
+  Future<void> showAllCurrentAlertsImmediately() async {
+    debugPrint('Showing ${_currentAlerts.length} current alerts immediately');
+    
+    for (final alert in _currentAlerts.where((a) => !a.seen)) {
+      debugPrint('Showing immediate notification for existing alert: ${alert.id} - ${alert.title}');
+      final result = await _notificationService.showAlertNotification(alert);
+      debugPrint('Existing alert immediate notification result: $result');
+      
+      // Small delay between notifications
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+  }
+  
+  /// Debug method to show what's different between test alerts and real alerts
+  Future<void> debugCompareAlerts() async {
+    debugPrint('=== DEBUGGING ALERT COMPARISON ===');
+    
+    // Create a test alert for comparison
+    final testAlert = Alert(
+      id: "debug_test",
+      title: "Debug Test Alert",
+      description: "This is for debugging comparison",
+      severity: AlertSeverity.critical,
+      type: AlertType.combined,
+      seen: false,
+    );
+    
+    debugPrint('Test Alert Details:');
+    debugPrint('  ID: ${testAlert.id}');
+    debugPrint('  Title: ${testAlert.title}');
+    debugPrint('  Description: ${testAlert.description}');
+    debugPrint('  Severity: ${testAlert.severity}');
+    debugPrint('  Type: ${testAlert.type}');
+    
+    if (_currentAlerts.isNotEmpty) {
+      final realAlert = _currentAlerts.first;
+      debugPrint('Real Alert Details:');
+      debugPrint('  ID: ${realAlert.id}');
+      debugPrint('  Title: ${realAlert.title}');
+      debugPrint('  Description: ${realAlert.description}');
+      debugPrint('  Severity: ${realAlert.severity}');
+      debugPrint('  Type: ${realAlert.type}');
+      debugPrint('  Seen: ${realAlert.seen}');
+      debugPrint('  Created: ${realAlert.createdAt}');
+    }
+    
+    debugPrint('Notification service permissions:');
+    await _notificationService.requestPermissions();
+    
+    debugPrint('=== END DEBUG COMPARISON ===');
   }
   
   /// Check if notifications are enabled
@@ -433,13 +539,85 @@ class AlertService {
         return false;
       }
       
-      // Create a test alert which will handle the notification
+      // Test immediate notification first
+      debugPrint('Testing immediate notification...');
+      final immediateResult = await _notificationService.sendTestNotification();
+      debugPrint('Immediate notification result: $immediateResult');
+      
+      // Then create a scheduled test alert
       await createTestAlert(delay: const Duration(seconds: 5));
       
-      return true;
+      return immediateResult;
     } catch (e) {
       debugPrint('Error testing notifications: $e');
       return false;
+    }
+  }
+  
+  /// Test immediate notification to verify system works
+  Future<bool> testImmediateNotification() async {
+    try {
+      debugPrint('Testing immediate notification system...');
+      
+      // Force request permissions first
+      await _notificationService.requestPermissions();
+      
+      // Send immediate test notification
+      final result = await _notificationService.sendTestNotification();
+      debugPrint('Immediate test notification sent: $result');
+      
+      return result;
+    } catch (e) {
+      debugPrint('Error testing immediate notification: $e');
+      return false;
+    }
+  }
+  
+  /// Create and show an alert notification immediately (for testing)
+  Future<void> createAndShowImmediateAlert() async {
+    final timestamp = DateTime.now();
+    final testAlert = Alert(
+      id: "immediate_test_${timestamp.millisecondsSinceEpoch}",
+      title: "Natychmiastowy alert testowy",
+      description: "Ten alert powinien pojawić się natychmiast na ekranie blokady urządzenia o ${timestamp.hour}:${timestamp.minute}:${timestamp.second}.",
+      severity: AlertSeverity.critical,
+      type: AlertType.combined,
+      createdAt: timestamp,
+      seen: false,
+    );
+    
+    debugPrint('Creating immediate test alert...');
+    
+    // Add to list
+    _currentAlerts.add(testAlert);
+    _sortAlertsByPriority();
+    alertsNotifier.value = List.from(_currentAlerts);
+    await _saveAlerts();
+    
+    // Show notification immediately
+    debugPrint('Showing immediate alert notification...');
+    final result = await _notificationService.showAlertNotification(testAlert);
+    debugPrint('Immediate alert notification result: $result');
+  }
+  
+  /// Debug notification permissions and system status
+  Future<Map<String, dynamic>> debugNotificationStatus() async {
+    try {
+      final enabled = await areNotificationsEnabled();
+      final permissionsResult = await _notificationService.requestPermissions();
+      
+      final status = {
+        'notifications_enabled_in_app': enabled,
+        'system_permissions_granted': permissionsResult,
+        'current_alerts_count': _currentAlerts.length,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      
+      debugPrint('Notification debug status: $status');
+      return status;
+    } catch (e) {
+      debugPrint('Error getting notification debug status: $e');
+      return {'error': e.toString()};
     }
   }
 }
