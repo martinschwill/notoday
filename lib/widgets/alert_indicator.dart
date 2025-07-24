@@ -38,9 +38,14 @@ class _AlertIndicatorState extends State<AlertIndicator> {
   
   void _updateAlertCount() {
     if (mounted) {
-      setState(() {
-        _alertCount = _alertService.alerts.length;
-        debugPrint('Alert count updated to: $_alertCount');
+      // Defer setState to avoid calling it during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _alertCount = _alertService.alerts.length;
+            debugPrint('Alert count updated to: $_alertCount');
+          });
+        }
       });
     }
   }
