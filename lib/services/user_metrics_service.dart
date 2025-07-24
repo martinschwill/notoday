@@ -50,7 +50,7 @@ class UserMetricsService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_symptomsDataKey, jsonEncode(data));
     await recordActivity();
-    await runAlertChecks();
+    // await runAlertChecks();
   }
   
   /// Save positive emotions data
@@ -58,7 +58,7 @@ class UserMetricsService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_posEmotionsDataKey, jsonEncode(data));
     await recordActivity();
-    await runAlertChecks();
+    // await runAlertChecks();
   }
   
   /// Save negative emotions data
@@ -66,7 +66,7 @@ class UserMetricsService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_negEmotionsDataKey, jsonEncode(data));
     await recordActivity();
-    await runAlertChecks();
+    // await runAlertChecks();
   }
   
   /// Get symptoms data

@@ -91,8 +91,8 @@ class AlertService {
   Future<void> _scheduleNotifications(List<Alert> alerts) async {
     for (int i = 0; i < alerts.length; i++) {
       final alert = alerts[i];
-      // Use 5 seconds base delay + additional time for multiple alerts
-      final delay = Duration(seconds: 5 + (i * 2));
+      // Use X seconds base delay + additional time for multiple alerts
+      final delay = Duration(seconds: 90 + (i * 2));
       await _notificationService.scheduleAlertNotification(alert, delay: delay);
       debugPrint('Scheduled notification for alert: ${alert.id} with ${delay.inSeconds}s delay');
     }
