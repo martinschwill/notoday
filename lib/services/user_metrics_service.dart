@@ -131,11 +131,7 @@ class UserMetricsService {
       
       if (daysRange < 7 && (symptomsData.isEmpty || posEmotionsData.isEmpty || negEmotionsData.isEmpty)) {
         debugPrint('Not enough data for trend analysis. Need at least 7 days of data.');
-        // If we're missing data, create a test alert for debugging purposes
-        if (showNotifications) {
-          debugPrint('Creating test alert instead since data is missing');
-          await AlertService().createTestAlert(delay: const Duration(seconds: 5));
-        }
+        
         return [];
       }
       
