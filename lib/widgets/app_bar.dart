@@ -17,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text('NOTODAY'),
-                content: const Text('ver 0.9.0'),
+                content: const Text('ver 1.0.0'),
                 actions: <Widget>[
                   TextButton(
                     child: const Text('OK'),

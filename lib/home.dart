@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Kiedy ostatnio użyłeś?'),
+          title: const Text('Kiedy ostatnio piłeś/brałeś?'),
           content: SizedBox(
             width: double.maxFinite, // Ensure the dialog has enough width
             child: Column(

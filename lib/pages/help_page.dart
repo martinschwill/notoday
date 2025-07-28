@@ -50,9 +50,9 @@ class HelpPage extends StatelessWidget {
                 ),
                 _buildFeature(
                   '🛠️ Zestaw narzędzi pomocowych',
-                  '• Telefon: Szybki dostęp do ważnych numerów (terapeuta, kryzysowa linia, rodzina)\n'
-                  '• Działania: Lista pomocnych technik i ćwiczeń (oddechowe, mindfulness, relaksacyjne)\n'
-                  '• Miejsca: Lokalizacje wspierające (parki, kawiarnie, miejsca spokoju)',
+                  '• Telefon: Szybki dostęp do ważnych numerów (terapeuta, kryzysowa linia, rodzina, trzeźwiejący znajomi)\n'
+                  '• Działania: Lista pomocnych technik i ćwiczeń (oddechowe, mindfulness, relaksacyjne, rekreacyjne, sportowe)\n'
+                  '• Miejsca: Lokalizacje wspierające (terapie, mitingi, parki, kawiarnie, miejsca spokoju)',
                 ),
               ],
             ),
@@ -65,8 +65,8 @@ class HelpPage extends StatelessWidget {
                 _buildStep('1', 'Rejestracja i logowanie', 'Utwórz konto lub zaloguj się do istniejącego konta.'),
                 _buildStep('2', 'Codzienne wpisy', 'Regularnie oceniaj swoje objawy i emocje. Zaznaczaj każdy objaw i emocje, nawet jeżeli są subtelne lub chwilowe.'),
                 _buildStep('3', 'Budowanie zestawu narzędzi', 'Dodaj numery telefonów, własne techniki radzenia sobie i bezpieczne miejsca (konkretne adresy).'),
-                _buildStep('4', 'Śledzenie postępów', 'Przeglądaj analizy i trendy w swoim samopoczuciu.'),
-                _buildStep('5', 'Korzystanie z analiz', 'Używaj przycisk "Analizuj" aby otrzymać szczegółowe informacje o trendach. Zwracaj uwagę na alerty!'),
+                _buildStep('4', 'Korzystanie z analiz', 'Używaj przycisk "Analizuj" jak najczęściej, aby otrzymać szczegółowe informacje o trendach. Zwracaj uwagę na alerty!'),
+                _buildStep('5', 'Śledzenie postępów', 'Przeglądaj analizy i trendy w swoim samopoczuciu. Zwracaj uwagę na gwałtowne zmiany oraz które emocje wywołują objawy głodu.'),
               ],
             ),
 
@@ -75,6 +75,7 @@ class HelpPage extends StatelessWidget {
               '🎯 Interaktywność zestawu narzędzi',
               '',
               children: [
+                _buildTip('Twórz własne narzędzia', 'Od Ciebie zależy, jakie numery, adresy i techniki dodasz do swojego zestawu. Korzystaj z nich w momentach kryzysowych!'),
                 _buildInteractiveFeature('📞', 'Dotknij telefon', 'Automatyczne wywołanie numeru'),
                 _buildInteractiveFeature('⚡', 'Dotknij działanie', 'Wyświetlenie szczegółów techniki'),
                 _buildInteractiveFeature('📍', 'Dotknij miejsce', 'Otwarcie lokalizacji w Mapach Google'),
@@ -103,7 +104,7 @@ class HelpPage extends StatelessWidget {
                 _buildTip('Szczerość', 'Bądź szczery/a w ocenach - to pomoże w lepszym zrozumieniu siebie.'),
                 // _buildTip('Notatki', 'Dodawaj szczegółowe notatki o wydarzeniach dnia i swoich reakcjach.'),
                 _buildTip('Analiza', 'Regularnie przeglądaj wykresy aby zauważyć wzorce.'),
-                _buildTip('Narzędzia', 'Aktualizuj swój zestaw narzędzi - dodawaj nowe kontakty i techniki. Usuwaj te, które nie działają.'),
+                _buildTip('Narzędzia', 'Aktualizuj swój zestaw narzędzi - dodawaj nowe kontakty, miejsca i techniki. Usuwaj te, które nie działają.'),
               ],
             ),
 
@@ -135,7 +136,7 @@ class HelpPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Aplikacja służy jako cyfrowy towarzysz w podróży ku lepszemu zdrowiu psychicznemu, pomagając w organizacji wsparcia i zrozumieniu własnych potrzeb emocjonalnych oraz sytuacji niesprzyjających trzeźwieniu.',
+                    'Aplikacja służy jako cyfrowy towarzysz trzeźwości w podróży ku lepszemu zdrowiu psychicznemu i fizycznemu. Pomaga w organizacji wsparcia i zrozumieniu własnych potrzeb emocjonalnych oraz sytuacji niesprzyjających trzeźwieniu.',
                     style: TextStyle(fontSize: 14),
                   ),
                 ],

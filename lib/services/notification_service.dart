@@ -243,9 +243,31 @@ class NotificationService {
     try {
       final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
       if (iOSPlugin != null) {
-        // Just clear the badge number directly
-        await iOSPlugin.requestPermissions(badge: true);
-        debugPrint('Badge count cleared');
+        // First cancel all notifications to clear any pending badges
+        await _plugin.cancelAll();
+        
+        // Then show a silent notification with badge 0 and immediately cancel it
+        await _plugin.show(
+          9999, // Special ID for badge clearing
+          null,
+          null,
+          const NotificationDetails(
+            iOS: DarwinNotificationDetails(
+              presentAlert: false,
+              presentSound: false,
+              presentBanner: false,   // Don't show banner
+              presentList: false,     // Don't show in notification center  
+              presentBadge: true,
+              badgeNumber: 0, // Set badge to 0
+            ),
+            android: null,
+          ),
+        );
+        
+        // Immediately cancel this notification so it doesn't appear when app is opened
+        await _plugin.cancel(9999);
+        
+        debugPrint('Badge count cleared to 0');
       }
     } catch (e) {
       debugPrint('Error clearing badge: $e');
