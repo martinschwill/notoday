@@ -1,5 +1,7 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_dynamic_icon (0.0.1):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_native_splash (2.4.3):
@@ -19,6 +21,7 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_dynamic_icon (from `.symlinks/plugins/flutter_dynamic_icon/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
@@ -30,6 +33,8 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_dynamic_icon:
+    :path: ".symlinks/plugins/flutter_dynamic_icon/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_native_splash:
@@ -47,6 +52,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_dynamic_icon: 9b73b8d673f589e913991cc025c007823c59ed19
   flutter_local_notifications: ef18f0537538fcd18e9106b3ddc91cc10b4e579a
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13

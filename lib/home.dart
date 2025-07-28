@@ -49,17 +49,10 @@ class _HomePageState extends State<HomePage> {
     return false; // Not the first run for this user
   }
 
-
-  // Notification service to manage app badge
-  final NotificationService _notificationService = NotificationService();
-
   @override
   void initState() {
     super.initState();
     _fetchDaysSinceSober(); // Fetch the number of days when the widget is initialized
-    
-    // Clear app icon badge when the app is opened
-    _notificationService.resetBadgeOnAppOpen();
     
     _isFirstRun().then((firstTime){ // check if it's the first run
       if(firstTime) { 

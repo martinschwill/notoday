@@ -28,8 +28,17 @@ class AlertService {
       }
     );
     await _loadAlerts();
+    await _updateBadgeCount();
   }
   
+  /// Update badge count based on number of alerts
+  Future<void> _updateBadgeCount() async {
+    // Badge should show unseen alerts only
+    final unseenAlertCount = _alerts.where((alert) => !alert.seen).length;
+    debugPrint('Updating badge count to: $unseenAlertCount (total alerts: ${_alerts.length})');
+    await _notificationService.updateBadgeCount(unseenAlertCount);
+  }
+
   /// Generate alerts from data and show notifications
   Future<List<Alert>> checkAndGenerateAlerts({
     required List<int> symptomsData,
@@ -57,6 +66,7 @@ class AlertService {
       _alerts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       alertsNotifier.value = List.from(_alerts);
       await _saveAlerts();
+      await _updateBadgeCount();
       
       // Show notifications with standard delay
       if (showNotifications && await _areNotificationsEnabled()) {
@@ -82,6 +92,7 @@ class AlertService {
     _alerts.add(alert);
     alertsNotifier.value = List.from(_alerts);
     await _saveAlerts();
+    await _updateBadgeCount();
     
     await _notificationService.scheduleAlertNotification(alert, delay: delay);
     debugPrint('Test alert created and scheduled');
@@ -115,7 +126,7 @@ class AlertService {
     }
     alertsNotifier.value = List.from(_alerts);
     await _saveAlerts();
-    await _notificationService.clearBadgeNumbers();
+    await _updateBadgeCount();
   }
   
   /// Remove alert
@@ -123,6 +134,7 @@ class AlertService {
     _alerts.removeWhere((alert) => alert.id == alertId);
     alertsNotifier.value = List.from(_alerts);
     await _saveAlerts();
+    await _updateBadgeCount();
   }
   
   /// Dismiss alert (alias for removeAlert)
@@ -136,7 +148,7 @@ class AlertService {
     alertsNotifier.value = [];
     await _saveAlerts();
     await _notificationService.cancelAllNotifications();
-    await _notificationService.clearBadgeNumbers();
+    await _updateBadgeCount();
   }
   
   /// Test notifications
@@ -159,6 +171,7 @@ class AlertService {
     _alerts.add(alert);
     alertsNotifier.value = List.from(_alerts);
     await _saveAlerts();
+    await _updateBadgeCount();
     
     await _scheduleNotifications([alert]);
     debugPrint('Test alert created with standard delay');
@@ -186,7 +199,7 @@ class AlertService {
     if (!enabled) {
       // Cancel any pending notifications if disabled
       await _notificationService.cancelAllNotifications();
-      await _notificationService.clearBadgeNumbers();
+      await _updateBadgeCount();
     }
   }
   
@@ -238,6 +251,7 @@ class AlertService {
         
         alertsNotifier.value = List.from(_alerts);
         await _saveAlerts();
+        await _updateBadgeCount();
       }
     } catch (e) {
       debugPrint('Error loading alerts: $e');

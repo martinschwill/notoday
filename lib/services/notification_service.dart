@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
@@ -238,68 +240,22 @@ class NotificationService {
     }
   }
   
-  /// Reset badge count to zero without showing a notification
-  Future<void> clearBadge() async {
-    try {
-      final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
-      if (iOSPlugin != null) {
-        // First cancel all notifications to clear any pending badges
-        await _plugin.cancelAll();
-        
-        // Then show a silent notification with badge 0 and immediately cancel it
-        await _plugin.show(
-          9999, // Special ID for badge clearing
-          null,
-          null,
-          const NotificationDetails(
-            iOS: DarwinNotificationDetails(
-              presentAlert: false,
-              presentSound: false,
-              presentBanner: false,   // Don't show banner
-              presentList: false,     // Don't show in notification center  
-              presentBadge: true,
-              badgeNumber: 0, // Set badge to 0
-            ),
-            android: null,
-          ),
-        );
-        
-        // Immediately cancel this notification so it doesn't appear when app is opened
-        await _plugin.cancel(9999);
-        
-        debugPrint('Badge count cleared to 0');
-      }
-    } catch (e) {
-      debugPrint('Error clearing badge: $e');
-    }
-  }
+  /// Reset badge count to zero
   
-  /// Update badge based on number of alerts
-  Future<void> updateBadgeCount(int count) async {
+  /// Update badge count to match number of alerts
+  updateBadgeCount(int count) async {
     try {
-      final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
-      if (iOSPlugin != null) {
-        // Use a silent notification to update badge count
-        await _plugin.show(
-          9998,
-          null,
-          null,
-          NotificationDetails(
-            iOS: DarwinNotificationDetails(
-              presentAlert: false,
-              presentSound: false,
-              presentBadge: true,
-              badgeNumber: count,
-            ),
-            android: null,
-          ),
-        );
-        debugPrint('Badge count updated to $count');
-      }
+      await FlutterDynamicIcon.setApplicationIconBadgeNumber(count); 
+    } on PlatformException {
+      debugPrint('Error: Platform not supported');
     } catch (e) {
       debugPrint('Error updating badge count: $e');
     }
+
   }
+  
+  
+  
   
   /// Send a test notification to verify system is working
   Future<bool> sendTestNotification() async {
@@ -450,78 +406,4 @@ class NotificationService {
         return Colors.blue;
     }
   }
-  
-  // MARK: - Compatibility Methods
-  
-  /// Legacy method to clear badge numbers
-  Future<void> clearBadgeNumbers() async {
-    await clearBadge();
-  }
-  
-  /// Legacy method for badge updating
-  Future<void> refreshBadgeCount() async {
-    try {
-      final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
-          
-      if (iOSPlugin != null) {
-        // Get count of pending notifications
-        final pendingRequests = await iOSPlugin.pendingNotificationRequests();
-        final badgeCount = pendingRequests.length;
-        await updateBadgeCount(badgeCount);
-      }
-    } catch (e) {
-      debugPrint('Error refreshing badge count: $e');
-    }
-  }
-  
-  /// Legacy method to test if notifications are working
-  Future<bool> testDeviceNotifications() async {
-    return sendTestNotification();
-  }
-  
-  /// Legacy method to show test notification
-  Future<void> showTestNotification() async {
-    await sendTestNotification();
-  }
-  
-  /// Legacy method to reset badge when app is opened
-  Future<void> resetBadgeOnAppOpen() async {
-    await clearBadge();
-  }
-  
-  /// Legacy method for scheduling test notifications
-  Future<void> scheduleTestNotifications() async {
-    try {
-      await requestPermissions();
-      
-      // Schedule test alerts at 5s and 10s
-      final testAlert1 = Alert(
-        id: 'test-5s',
-        title: 'Test Alert (5s)',
-        description: 'This is a test alert scheduled for 5 seconds',
-        severity: AlertSeverity.info,
-        type: AlertType.combined,
-        seen: false,
-      );
-      
-      final testAlert2 = Alert(
-        id: 'test-10s',
-        title: 'Test Alert (10s)',
-        description: 'This is a test alert scheduled for 10 seconds',
-        severity: AlertSeverity.warning,
-        type: AlertType.combined,
-        seen: false, 
-      );
-      
-      await scheduleAlertNotification(testAlert1, delay: const Duration(seconds: 5));
-      await scheduleAlertNotification(testAlert2, delay: const Duration(seconds: 10));
-      
-      debugPrint('Two test notifications scheduled successfully');
-    } catch (e) {
-      debugPrint('Error scheduling test notifications: $e');
-    }
-  }
-  
-  // Legacy methods removed: _clearBadgeNumber and _updateBadgeCount are now directly using clearBadge and refreshBadgeCount
 }
