@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
+// import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart'; // using flutter_app_badger instead 
+// import 'package:flutter_app_badger/flutter_app_badger.dart'; //using flutter_app_badger instead 
+import 'package:app_badge_plus/app_badge_plus.dart'; 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../modules/alerting.dart';
+import 'dart:io'; 
 
 /// Service to handle showing alerts as system notifications
 /// Rebuilt for simplicity and reliability
@@ -244,18 +247,16 @@ class NotificationService {
   
   /// Update badge count to match number of alerts
   updateBadgeCount(int count) async {
-    try {
-      await FlutterDynamicIcon.setApplicationIconBadgeNumber(count); 
-    } on PlatformException {
-      debugPrint('Error: Platform not supported');
-    } catch (e) {
-      debugPrint('Error updating badge count: $e');
+    if (Platform.isIOS) {
+      try {
+        await AppBadgePlus.updateBadge(count);
+      } catch (e) {
+        debugPrint('Error updating badge count: $e');
+      }
+    } else {
+      debugPrint('Badge count update skipped - not iOS platform');
     }
-
   }
-  
-  
-  
   
   /// Send a test notification to verify system is working
   Future<bool> sendTestNotification() async {

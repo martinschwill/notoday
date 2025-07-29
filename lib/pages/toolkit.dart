@@ -187,7 +187,7 @@ class _ToolkitPageState extends State<ToolkitPage> {
     // Extract number from the description
     String cleanNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), ''); 
     final Uri phoneUri = Uri(scheme: 'tel', path: cleanNumber);
-
+    
     if(await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
     } else {
