@@ -369,11 +369,11 @@ class NotificationService {
   DarwinNotificationDetails _getIOSDetails(Alert alert) {
     return DarwinNotificationDetails(
       presentAlert: true,
-      presentBadge: true,
+      presentBadge: false,
       presentSound: true,
       presentBanner: true,
       presentList: true,
-      badgeNumber: 1,
+      // badgeNumber: 1,
       categoryIdentifier: 'ALERT_CATEGORY',
       interruptionLevel: alert.severity == AlertSeverity.critical 
           ? InterruptionLevel.timeSensitive

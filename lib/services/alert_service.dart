@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../modules/alerting.dart';
 import 'notification_service.dart';
+import 'dart:math'; 
 
 /// Simple service to manage alerts and notifications
 class AlertService {
@@ -103,7 +104,8 @@ class AlertService {
     for (int i = 0; i < alerts.length; i++) {
       final alert = alerts[i];
       // Use X seconds base delay + additional time for multiple alerts
-      final delay = Duration(seconds: 90 + (i * 2));
+      final randomDelay = Random().nextInt(45) + 30; 
+      final delay = Duration(seconds: randomDelay + (i * 2));
       await _notificationService.scheduleAlertNotification(alert, delay: delay);
       debugPrint('Scheduled notification for alert: ${alert.id} with ${delay.inSeconds}s delay');
     }
