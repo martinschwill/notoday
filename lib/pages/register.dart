@@ -125,6 +125,14 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 20.0),
             TextField(
+              controller: _userEmailController,
+                decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Email',
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            TextField(
               controller: _userPasswordController,
               obscureText: true, // Hide the password input
               decoration: const InputDecoration(
@@ -133,14 +141,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             const SizedBox(height: 20.0),
-            TextField(
-              controller: _userEmailController,
-                decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
-              ),
-            ),
-            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isLoading ? null : _register,
               style: ElevatedButton.styleFrom(
