@@ -119,43 +119,7 @@ class Alert {
     );
   }
   
-  /// Factory method for a combined alert when multiple metrics show concerning trends
-  factory Alert.combinedMetrics({
-    required TrendAnalysis symptomsTrend,
-    required TrendAnalysis posEmotionsTrend,
-    required TrendAnalysis negEmotionsTrend,
-    VoidCallback? onTap,
-  }) {
-    const title = "Niepokojący trend";
-    const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych.";
-    
-    // Determine worst severity based on the most concerning trend
-    double worstChange = 0;
-    worstChange = [
-      symptomsTrend.percentChange,
-      negEmotionsTrend.percentChange,
-      posEmotionsTrend.percentChange.abs()
-    ].reduce((max, value) => value > max ? value : max);
-    
-    AlertSeverity severity;
-    if (worstChange > 2) {
-      severity = AlertSeverity.critical;
-    } else if (worstChange > 1) {
-      severity = AlertSeverity.warning;
-    } else {
-      severity = AlertSeverity.info;
-    }
-    
-    return Alert(
-      id: "combined_${DateTime.now().millisecondsSinceEpoch}",
-      title: title,
-      description: description,
-      severity: severity,
-      type: AlertType.combined,
-      onTap: onTap,
-      seen: false,
-    );
-  }
+
 }
 
 class Alerting {
@@ -273,10 +237,33 @@ class Alerting {
     bool allTrendsConcerning = symptomsIncreasing && posEmotionsDecreasing && negEmotionsIncreasing;
     
     if (allTrendsConcerning) {
-      return Alert.combinedMetrics(
-        symptomsTrend: symptomsTrend,
-        posEmotionsTrend: posEmotionsTrend,
-        negEmotionsTrend: negEmotionsTrend,
+      const title = "Zagrażający trend";
+      const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych. To bardzo niebezpieczny stan, który wymaga natychmiastowej uwagi. Skorzystaj z Narzędzi!";
+      
+      // Determine worst severity based on the most concerning trend
+      double worstChange = 0;
+      worstChange = [
+        symptomsTrend.percentChange,
+        negEmotionsTrend.percentChange,
+        posEmotionsTrend.percentChange.abs()
+      ].reduce((max, value) => value > max ? value : max);
+      
+      AlertSeverity severity;
+      if (worstChange > 2) {
+        severity = AlertSeverity.critical;
+      } else if (worstChange > 1) {
+        severity = AlertSeverity.warning;
+      } else {
+        severity = AlertSeverity.info;
+      }
+      
+      return Alert(
+        id: "combined_${DateTime.now().millisecondsSinceEpoch}",
+        title: title,
+        description: description,
+        severity: severity,
+        type: AlertType.combined,
+        seen: false,
       );
     }
     
