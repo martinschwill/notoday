@@ -1,5 +1,6 @@
 import '../common_imports.dart';
 import 'package:flutter/material.dart';
+import 'dart:math'; 
 
 /// Enum representing alert severity levels
 enum AlertSeverity {
@@ -16,6 +17,24 @@ enum AlertType {
   positiveEmotions,
   negativeEmotions,
   combined,
+}
+
+final List <String> advise = [
+  "Skorzystaj z Narzędzi, aby poprawić swoje samopoczucie.",
+  "Telefon do specjalisty lub trzeźwiejącego uzależnionego może być pomocne!",
+  "Zastosuj techniki relaksacyjne, aby złagodzić stres.",
+  "Skontaktuj się z terapeutą lub specjalistą zdrowia psychicznego.",
+  "Skorzystaj ze swojej listy Narzędzi!",
+  "Nie wahaj się prosić o pomoc, gdy jej potrzebujesz.",
+  "Pamiętaj, że nie jesteś sam w tym, co przeżywasz.", 
+  "Zastosuj techniki uważności, aby poprawić swoje samopoczucie.",
+  "Regularne ćwiczenia fizyczne mogą pomóc w poprawie nastroju.",
+  "Zjedzenie czegoś, co lubisz, może poprawić Twój nastrój.",
+];
+
+String getRandomAdvice() {
+  final random = Random();
+  return advise[random.nextInt(advise.length)];
 }
 
 /// Alert model class
@@ -85,41 +104,6 @@ class Alert {
     );
   }
   
-  /// Factory method to create an inactivity alert
-  factory Alert.inactivity({
-    required int daysSinceLastActivity,
-    VoidCallback? onTap,
-  }) {
-    AlertSeverity severity;
-    String title;
-    String description;
-    
-    if (daysSinceLastActivity > 7) {
-      severity = AlertSeverity.critical;
-      title = "Długa nieaktywność";
-      description = "Minęło $daysSinceLastActivity dni od ostatniej aktywności w aplikacji. Regularne monitorowanie objawów jest ważne.";
-    } else if (daysSinceLastActivity > 3) {
-      severity = AlertSeverity.warning;
-      title = "Brak aktywności";
-      description = "Minęły $daysSinceLastActivity dni od ostatniej aktywności. Pamiętaj o regularnym korzystaniu z aplikacji.";
-    } else {
-      severity = AlertSeverity.info;
-      title = "Przypomnienie";
-      description = "Minęły $daysSinceLastActivity dni od ostatniej aktywności. Warto regularnie monitorować swoje objawy i samopoczucie.";
-    }
-    
-    return Alert(
-      id: "inactivity_${DateTime.now().millisecondsSinceEpoch}",
-      title: title,
-      description: description,
-      severity: severity,
-      type: AlertType.inactivity,
-      onTap: onTap,
-      seen: false,
-    );
-  }
-  
-
 }
 
 class Alerting {
@@ -157,7 +141,32 @@ class Alerting {
     final difference = now.difference(lastActivityDate).inDays;
     
     if (difference >= moderateInactivityDays) {
-      return Alert.inactivity(daysSinceLastActivity: difference);
+      AlertSeverity severity;
+      String title;
+      String description;
+      
+      if (difference > 7) {
+        severity = AlertSeverity.critical;
+        title = "Długa nieaktywność";
+        description = "Minęło $difference dni od ostatniej aktywności w aplikacji. Regularne monitorowanie objawów jest ważne.";
+      } else if (difference > 3) {
+        severity = AlertSeverity.warning;
+        title = "Brak aktywności";
+        description = "Minęły $difference dni od ostatniej aktywności. Pamiętaj o regularnym korzystaniu z aplikacji.";
+      } else {
+        severity = AlertSeverity.info;
+        title = "Przypomnienie";
+        description = "Minęły $difference dni od ostatniej aktywności. Warto regularnie monitorować swoje objawy i samopoczucie.";
+      }
+      
+      return Alert(
+        id: "inactivity_${DateTime.now().millisecondsSinceEpoch}",
+        title: title,
+        description: description,
+        severity: severity,
+        type: AlertType.inactivity,
+        seen: false,
+      );
     }
     
     return null;
@@ -171,7 +180,7 @@ class Alerting {
     if (trend.direction == "upward" && trend.percentChange > moderateTrendChange) {
       return Alert.fromTrend(
         title: "Wzrost objawów",
-        description: "Twoje objawy wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów.",
+        description: "Twoje objawy wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów." + getRandomAdvice(),
         trend: trend,
         type: AlertType.symptoms,
       );
@@ -188,7 +197,7 @@ class Alerting {
     if (trend.direction == "downward" && trend.percentChange < -moderateTrendChange) {
       return Alert.fromTrend(
         title: "Spadek przyjemnych emocji",
-        description: "Twoje przyjemne emocje spadły o ${trend.percentChange.abs().toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów.",
+        description: "Twoje przyjemne emocje spadły o ${trend.percentChange.abs().toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów." + getRandomAdvice(),
         trend: trend,
         type: AlertType.positiveEmotions,
       );
@@ -205,7 +214,7 @@ class Alerting {
     if (trend.direction == "upward" && trend.percentChange > moderateTrendChange) {
       return Alert.fromTrend(
         title: "Wzrost nieprzyjemnych emocji",
-        description: "Twoje nieprzyjemne emocje wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów.",
+        description: "Twoje nieprzyjemne emocje wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów." + getRandomAdvice(),
         trend: trend,
         type: AlertType.negativeEmotions,
       );
@@ -238,7 +247,7 @@ class Alerting {
     
     if (allTrendsConcerning) {
       const title = "Zagrażający trend";
-      const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych. To bardzo niebezpieczny stan, który wymaga natychmiastowej uwagi. Skorzystaj z Narzędzi!";
+      const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych. To bardzo niebezpieczny stan, który wymaga natychmiastowej uwagi. Skorzystaj z Narzędzi! Skontaktuj się z grupą, terapeutą lub swoim sponsorem!";
       
       // Determine worst severity based on the most concerning trend
       double worstChange = 0;
