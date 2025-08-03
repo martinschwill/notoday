@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 // import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart'; // using flutter_app_badger instead 
 // import 'package:flutter_app_badger/flutter_app_badger.dart'; //using flutter_app_badger instead 
 import 'package:app_badge_plus/app_badge_plus.dart'; 
@@ -383,12 +382,17 @@ class NotificationService {
   
   /// Handle notification response (when user taps on notification)
   void _onNotificationResponse(NotificationResponse response) async {
-    debugPrint('Notification tapped: ${response.payload}');
+    debugPrint('Notification banner tapped: ${response.payload}');
     
     if (response.payload != null) {
-      // Store the alert ID for navigation when app opens
+      // Store the alert ID for navigation when app opens (for backward compatibility)
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_tappedNotificationAlertKey, response.payload!);
+      
+      // Store a flag indicating we should navigate to toolkit
+      await prefs.setString('notification_navigate_to', 'toolkit');
+      
+      debugPrint('Notification banner: Stored navigation intent for toolkit');
     }
     
     _onNotificationTapped?.call(response.payload);

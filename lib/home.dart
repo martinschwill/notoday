@@ -52,6 +52,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    
+    // Set current user for global navigation
+    NavigationService.setCurrentUser(widget.userId, widget.userName);
+    
     _fetchDaysSinceSober(); // Fetch the number of days when the widget is initialized
     
     _isFirstRun().then((firstTime){ // check if it's the first run
@@ -241,10 +245,10 @@ class _HomePageState extends State<HomePage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(80.0), // Match the circle shape
                       onTap: () {
-                         Navigator.push(
+                        Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName, daysSinceSober: daysSinceSober),
+                          builder: (context) => AnalyzePage(userId: widget.userId, userName: widget.userName, daysSinceSober: daysSinceSober <= 60 ? daysSinceSober : 60),
                         ),
                       );
                       },
@@ -361,23 +365,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 20.0), // Add vertical spacing between buttons
 
-                  // Logout Button
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     Navigator.pushReplacement(
-                  //       context,
-                  //       MaterialPageRoute(builder: (context) => const LoginPage()),
-                  //     );
-                  //   },
-                  //   style: ElevatedButton.styleFrom(
-                  //     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  //     textStyle: const TextStyle(fontSize: 18.0),
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(20.0),
-                  //     ),
-                  //   ),
-                  //   child: const Text('Wyloguj'),
-                  // ),
+
                 ],
               ),
             ),]

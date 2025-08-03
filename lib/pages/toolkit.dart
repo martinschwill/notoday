@@ -131,7 +131,6 @@ class _ToolkitPageState extends State<ToolkitPage> {
         Uri.parse('$baseUrl/toolkit?user_id=${widget.userId}'),
       );
       if (response.statusCode == 200) {
-        print(response.body); 
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           _toolkitItems.clear();
@@ -146,8 +145,6 @@ class _ToolkitPageState extends State<ToolkitPage> {
       } else {
         // Handle the error response
         print('Failed to load tools: ${response.statusCode}');
-        print(Uri.parse('$baseUrl/toolkit/${widget.userId}')); 
-        print(response.body); 
       }
     } catch (e) {
       // Handle any errors that occur during the fetch
@@ -175,7 +172,6 @@ class _ToolkitPageState extends State<ToolkitPage> {
       } else {
         // Handle the error response
         print('Failed to update tools: ${response.statusCode}');
-        print(response.body);
       }
     } catch (e) {
       // Handle any errors that occur during the update

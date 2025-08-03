@@ -20,7 +20,7 @@ enum AlertType {
 }
 
 final List <String> advise = [
-  "Skorzystaj z Narzędzi, aby poprawić swoje samopoczucie.",
+  "Skorzystaj z Narzędzi, aby poprawić swoje postrzeganie rzeczywistości.",
   "Telefon do specjalisty lub trzeźwiejącego uzależnionego może być pomocne!",
   "Zastosuj techniki relaksacyjne, aby złagodzić stres.",
   "Skontaktuj się z terapeutą lub specjalistą zdrowia psychicznego.",
@@ -30,6 +30,7 @@ final List <String> advise = [
   "Zastosuj techniki uważności, aby poprawić swoje samopoczucie.",
   "Regularne ćwiczenia fizyczne mogą pomóc w poprawie nastroju.",
   "Zjedzenie czegoś, co lubisz, może poprawić Twój nastrój.",
+  "Pamiętaj, że zły nastrój jest jak fala - przychodzi i odchodzi. Skup się na tym, co możesz zrobić teraz.",
 ];
 
 String getRandomAdvice() {
@@ -180,9 +181,12 @@ class Alerting {
     if (trend.direction == "upward" && trend.percentChange > moderateTrendChange) {
       return Alert.fromTrend(
         title: "Wzrost objawów",
-        description: "Twoje objawy wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów." + getRandomAdvice(),
+        description: "Twoje objawy wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów. ${getRandomAdvice()}",
         trend: trend,
         type: AlertType.symptoms,
+        onTap: () {
+          NavigationService.navigateToToolkitGlobal();
+        },
       );
     }
     
@@ -197,9 +201,12 @@ class Alerting {
     if (trend.direction == "downward" && trend.percentChange < -moderateTrendChange) {
       return Alert.fromTrend(
         title: "Spadek przyjemnych emocji",
-        description: "Twoje przyjemne emocje spadły o ${trend.percentChange.abs().toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów." + getRandomAdvice(),
+        description: "Twoje przyjemne emocje spadły o ${trend.percentChange.abs().toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów. ${getRandomAdvice()}" ,
         trend: trend,
         type: AlertType.positiveEmotions,
+        onTap: () {
+          NavigationService.navigateToToolkitGlobal();
+        },
       );
     }
     
@@ -214,9 +221,12 @@ class Alerting {
     if (trend.direction == "upward" && trend.percentChange > moderateTrendChange) {
       return Alert.fromTrend(
         title: "Wzrost nieprzyjemnych emocji",
-        description: "Twoje nieprzyjemne emocje wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów." + getRandomAdvice(),
+        description: "Twoje nieprzyjemne emocje wzrosły o ${trend.percentChange.toStringAsFixed(1)}% w ciągu ostatnich $daysRange pomiarów. ${getRandomAdvice()}",
         trend: trend,
         type: AlertType.negativeEmotions,
+        onTap: () {
+          NavigationService.navigateToToolkitGlobal();
+        }
       );
     }
     
@@ -242,28 +252,43 @@ class Alerting {
     bool posEmotionsDecreasing = posEmotionsTrend.direction == "downward" && posEmotionsTrend.percentChange < -moderateTrendChange;
     bool negEmotionsIncreasing = negEmotionsTrend.direction == "upward" && negEmotionsTrend.percentChange > moderateTrendChange;
     
-    // Only create combined alert when ALL three conditions are met
-    bool allTrendsConcerning = symptomsIncreasing && posEmotionsDecreasing && negEmotionsIncreasing;
+    // Count how many concerning trends we have
+    int concerningTrendsCount = 0;
+    if (symptomsIncreasing) concerningTrendsCount++;
+    if (posEmotionsDecreasing) concerningTrendsCount++;
+    if (negEmotionsIncreasing) concerningTrendsCount++;
     
-    if (allTrendsConcerning) {
-      const title = "Zagrażający trend";
-      const description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych. To bardzo niebezpieczny stan, który wymaga natychmiastowej uwagi. Skorzystaj z Narzędzi! Skontaktuj się z grupą, terapeutą lub swoim sponsorem!";
-      
-      // Determine worst severity based on the most concerning trend
-      double worstChange = 0;
-      worstChange = [
-        symptomsTrend.percentChange,
-        negEmotionsTrend.percentChange,
-        posEmotionsTrend.percentChange.abs()
-      ].reduce((max, value) => value > max ? value : max);
-      
+    // Create alert if 2 or more conditions are met
+    if (concerningTrendsCount >= 2) {
+      String title;
+      String description;
       AlertSeverity severity;
-      if (worstChange > 2) {
+      
+      if (concerningTrendsCount == 3) {
+        // All three conditions met - ALWAYS CRITICAL
+        title = "Zagrażający trend";
+        description = "Wszystkie wskaźniki pokazują niepokojący trend - wzrost objawów i emocji nieprzyjemnych oraz spadek emocji przyjemnych. To bardzo niebezpieczny stan, który wymaga natychmiastowej uwagi. Skorzystaj z Narzędzi! Skontaktuj się z grupą, terapeutą lub swoim sponsorem!";
         severity = AlertSeverity.critical;
-      } else if (worstChange > 1) {
-        severity = AlertSeverity.warning;
       } else {
-        severity = AlertSeverity.info;
+        // Two conditions met - severity based on worst change
+        title = "Niepokojący trend";
+        description = "Kilka wskaźników pokazuje niepokojący trend. Warto zwrócić uwagę na swoje samopoczucie i myślenie. ${getRandomAdvice()}";
+        
+        // Determine severity based on the most concerning trend
+        double worstChange = 0;
+        worstChange = [
+          symptomsTrend.percentChange,
+          negEmotionsTrend.percentChange,
+          posEmotionsTrend.percentChange.abs()
+        ].reduce((max, value) => value > max ? value : max);
+        
+        if (worstChange > 2) {
+          severity = AlertSeverity.critical;
+        } else if (worstChange > 1) {
+          severity = AlertSeverity.warning;
+        } else {
+          severity = AlertSeverity.info;
+        }
       }
       
       return Alert(
@@ -273,6 +298,9 @@ class Alerting {
         severity: severity,
         type: AlertType.combined,
         seen: false,
+        onTap: () {
+          NavigationService.navigateToToolkitGlobal();
+        },
       );
     }
     
