@@ -52,7 +52,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
-  flutter_native_splash: ^2.4.0
+  # flutter_native_splash: ^2.4.0  # Removed to prevent overwriting manual splash configuration
 
 flutter_icons:
   android: true
@@ -61,13 +61,8 @@ flutter_icons:
   adaptive_icon_background: "#7A9AAE"        # or use an image: "lib/assets/icon/background.png"
   adaptive_icon_foreground: "lib/assets/icon/foreground.png"
 
-flutter_native_splash:
-  image: lib/assets/icon/foreground.png
-  color: "#7A9AAE" 
-  android: true
-  ios: true
-  android_gravity: center
-  ios_content_mode: center
+# flutter_native_splash configuration removed to prevent overwriting manual splash screen changes
+# Manual splash screen implementation in android/app/src/main/res/drawable*/launch_background.xml
 
 # The "flutter_lints" package below contains a set of recommended lints to
 # encourage good coding practices. The lint set provided by the package is
