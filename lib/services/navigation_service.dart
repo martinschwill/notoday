@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 import '../pages/alerts_page.dart';
 import '../pages/toolkit.dart';
 
@@ -89,19 +90,25 @@ class NavigationService {
   /// Navigate to toolkit page using global key
   static void navigateToToolkitGlobal() {
     debugPrint('NavigationService: Attempting to navigate to toolkit');
+    debugPrint('NavigationService: Platform: ${Platform.operatingSystem}');
     debugPrint('NavigationService: Navigator key state: ${navigatorKey.currentState}');
     debugPrint('NavigationService: Current user - ID: $_currentUserId, Name: $_currentUserName');
     
     if (navigatorKey.currentState != null && _currentUserId != null && _currentUserName != null) {
       debugPrint('NavigationService: Pushing ToolkitPage with user data');
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(
-          builder: (context) => ToolkitPage(
-            userId: _currentUserId!,
-            userName: _currentUserName!,
+      try {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => ToolkitPage(
+              userId: _currentUserId!,
+              userName: _currentUserName!,
+            ),
           ),
-        ),
-      );
+        );
+        debugPrint('NavigationService: Navigation to toolkit completed successfully');
+      } catch (e) {
+        debugPrint('NavigationService: Error during navigation: $e');
+      }
     } else {
       debugPrint('NavigationService: ERROR - Navigator key state is null or user data missing!');
       debugPrint('NavigationService: Navigator: ${navigatorKey.currentState}, UserId: $_currentUserId, UserName: $_currentUserName');

@@ -45,7 +45,21 @@ class AlertWidget extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          onTap: alert.onTap,
+          onTap: () {
+            debugPrint('AlertWidget: Alert tapped - ${alert.title}');
+            debugPrint('AlertWidget: onTap callback is: ${alert.onTap}');
+            if (alert.onTap != null) {
+              debugPrint('AlertWidget: Calling onTap callback');
+              try {
+                alert.onTap!();
+                debugPrint('AlertWidget: onTap callback executed successfully');
+              } catch (e) {
+                debugPrint('AlertWidget: Error executing onTap callback: $e');
+              }
+            } else {
+              debugPrint('AlertWidget: ERROR - onTap callback is null!');
+            }
+          },
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.all(12),

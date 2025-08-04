@@ -142,9 +142,25 @@ class NotificationService {
       }
       
       // Android permissions
-      if (await Permission.notification.request().isGranted) {
-        permissionsGranted = true;
-        debugPrint('Android notification permissions granted');
+      if (Platform.isAndroid) {
+        // Request basic notification permission
+        if (await Permission.notification.request().isGranted) {
+          permissionsGranted = true;
+          debugPrint('Android notification permissions granted');
+          
+          // For Android 12+, also request exact alarm permission if available
+          try {
+            final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
+            if (exactAlarmStatus.isDenied) {
+              final exactAlarmResult = await Permission.scheduleExactAlarm.request();
+              debugPrint('Android exact alarm permission: ${exactAlarmResult.isGranted ? "granted" : "denied"}');
+            } else {
+              debugPrint('Android exact alarm permission already granted or not needed');
+            }
+          } catch (e) {
+            debugPrint('Exact alarm permission not available or error: $e');
+          }
+        }
       }
     } catch (e) {
       debugPrint('Error requesting notification permissions: $e');
@@ -198,26 +214,49 @@ class NotificationService {
       
       debugPrint('Scheduling notification for alert: ${alert.id} at ${scheduledTime.toIso8601String()} with ID: $notificationId');
       
-      // Schedule notification
-      await _plugin.zonedSchedule(
-        notificationId,
-        _getTitle(alert),
-        alert.description,
-        scheduledTime,
-        NotificationDetails(
-          android: _getAndroidDetails(alert),
-          iOS: _getIOSDetails(alert),
-        ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        payload: alert.id,
-      );
+      // Try exact scheduling first, then fall back to inexact
+      try {
+        await _plugin.zonedSchedule(
+          notificationId,
+          _getTitle(alert),
+          alert.description,
+          scheduledTime,
+          NotificationDetails(
+            android: _getAndroidDetails(alert),
+            iOS: _getIOSDetails(alert),
+          ),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          payload: alert.id,
+        );
+        debugPrint('Notification scheduled with exact timing');
+      } catch (exactError) {
+        debugPrint('Exact scheduling failed: $exactError, trying inexact');
+        
+        await _plugin.zonedSchedule(
+          notificationId,
+          _getTitle(alert),
+          alert.description,
+          scheduledTime,
+          NotificationDetails(
+            android: _getAndroidDetails(alert),
+            iOS: _getIOSDetails(alert),
+          ),
+          androidScheduleMode: AndroidScheduleMode.inexact,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          payload: alert.id,
+        );
+        debugPrint('Notification scheduled with inexact timing');
+      }
       
       debugPrint('Notification scheduled successfully for ${delay.inMinutes} minutes from now');
       return true;
     } catch (e) {
       debugPrint('Error scheduling notification: $e');
-      return false;
+      
+      // Fallback: try to show immediate notification if scheduling fails
+      debugPrint('Attempting to show immediate notification as fallback');
+      return await showAlertNotification(alert);
     }
   }
   
@@ -286,6 +325,8 @@ class NotificationService {
             importance: Importance.max,
             priority: Priority.max,
             color: Colors.blue,
+            icon: '@drawable/ic_notification', // Add icon for test notification
+            largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
             showWhen: true,
             when: now.millisecondsSinceEpoch,
           ),
@@ -357,6 +398,9 @@ class NotificationService {
       enableLights: true,
       enableVibration: true,
       playSound: true,
+      icon: '@drawable/ic_notification', // Dedicated small notification icon
+      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'), // Large icon for notification
+      styleInformation: const BigTextStyleInformation(''), // Allows for expanded text
       fullScreenIntent: alert.severity == AlertSeverity.critical,
       category: alert.severity == AlertSeverity.critical 
           ? AndroidNotificationCategory.alarm 
