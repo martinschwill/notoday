@@ -94,8 +94,29 @@ class NotificationService {
     // Request permissions immediately
     final permissionsGranted = await requestPermissions();
     
+    // Check battery optimization for Android devices
+    await _checkBatteryOptimization();
+    
     debugPrint('NotificationService initialized: $success, permissions granted: $permissionsGranted');
     return success ?? false;
+  }
+  
+  /// Check and request battery optimization exemption for Android
+  Future<void> _checkBatteryOptimization() async {
+    if (Platform.isAndroid) {
+      try {
+        // Request battery optimization exemption
+        final batteryOptimizationStatus = await Permission.ignoreBatteryOptimizations.status;
+        if (batteryOptimizationStatus.isDenied) {
+          await Permission.ignoreBatteryOptimizations.request();
+          debugPrint('Battery optimization exemption requested');
+        } else {
+          debugPrint('Battery optimization already handled or not needed');
+        }
+      } catch (e) {
+        debugPrint('Error checking battery optimization: $e');
+      }
+    }
   }
   
   /// Create notification channel for Android
@@ -125,6 +146,40 @@ class NotificationService {
     bool permissionsGranted = false;
     
     try {
+      if (Platform.isAndroid) {
+        // Request notification permission
+        if (await Permission.notification.request().isGranted) {
+          permissionsGranted = true;
+          debugPrint('Android notification permissions granted');
+          
+          // Request battery optimization exemption
+          try {
+            final batteryOptimizationStatus = await Permission.ignoreBatteryOptimizations.status;
+            if (batteryOptimizationStatus.isDenied) {
+              await Permission.ignoreBatteryOptimizations.request();
+              debugPrint('Battery optimization exemption requested');
+            } else {
+              debugPrint('Battery optimization already handled');
+            }
+          } catch (e) {
+            debugPrint('Battery optimization permission not available: $e');
+          }
+          
+          // Request exact alarm permission for Android 12+
+          try {
+            final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
+            if (exactAlarmStatus.isDenied) {
+              final exactAlarmResult = await Permission.scheduleExactAlarm.request();
+              debugPrint('Android exact alarm permission: ${exactAlarmResult.isGranted ? "granted" : "denied"}');
+            } else {
+              debugPrint('Android exact alarm permission already granted or not needed');
+            }
+          } catch (e) {
+            debugPrint('Exact alarm permission error: $e');
+          }
+        }
+      }
+      
       // iOS permissions - be more explicit
       final iOSPlugin = _plugin.resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin>();
@@ -141,27 +196,6 @@ class NotificationService {
         debugPrint('iOS notification permissions granted: $permissionsGranted');
       }
       
-      // Android permissions
-      if (Platform.isAndroid) {
-        // Request basic notification permission
-        if (await Permission.notification.request().isGranted) {
-          permissionsGranted = true;
-          debugPrint('Android notification permissions granted');
-          
-          // For Android 12+, also request exact alarm permission if available
-          try {
-            final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
-            if (exactAlarmStatus.isDenied) {
-              final exactAlarmResult = await Permission.scheduleExactAlarm.request();
-              debugPrint('Android exact alarm permission: ${exactAlarmResult.isGranted ? "granted" : "denied"}');
-            } else {
-              debugPrint('Android exact alarm permission already granted or not needed');
-            }
-          } catch (e) {
-            debugPrint('Exact alarm permission not available or error: $e');
-          }
-        }
-      }
     } catch (e) {
       debugPrint('Error requesting notification permissions: $e');
     }
