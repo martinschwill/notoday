@@ -402,7 +402,6 @@ class NotificationService {
   
   /// This method intentionally kept for compatibility reasons despite not being directly referenced
   /// It may be called through reflection or other means in the existing codebase
-  @pragma('vm:entry-point')
   String _getNotificationTitle(Alert alert) => _getTitle(alert);
   
   /// Get Android notification details based on alert severity
@@ -478,7 +477,6 @@ class NotificationService {
   
   /// This method intentionally kept for compatibility reasons despite not being directly referenced
   /// It may be called through reflection or other means in the existing codebase
-  @pragma('vm:entry-point')
   Color _getColorForSeverity(AlertSeverity severity) {
     switch (severity) {
       case AlertSeverity.critical:
