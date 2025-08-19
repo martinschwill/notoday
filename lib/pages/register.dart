@@ -14,12 +14,17 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _userPasswordController = TextEditingController();
   final TextEditingController _userEmailController = TextEditingController();
+  final TextEditingController _userEmailRepeatController = TextEditingController();
+  final TextEditingController _userEmailPasswordRepeatController = TextEditingController();
+
   bool _isLoading = false;
 
   Future<void> _register() async {
     setState(() => _isLoading = true);
     final userName = _userNameController.text.trim();
     final userPassword = _userPasswordController.text.trim();
+    final repeatPassword = _userEmailPasswordRepeatController.text.trim();
+    final repeatEmail = _userEmailRepeatController.text.trim();
     final userEmail = _userEmailController.text.trim();
 
     if (userName.isEmpty || userPassword.isEmpty || userEmail.isEmpty) {
@@ -41,6 +46,16 @@ class _RegisterPageState extends State<RegisterPage> {
       _showError('Nazwa użytkownika musi mieć co najmniej 3 znaki');
       setState(() => _isLoading = false);
       return;
+    }
+    if (userPassword != repeatPassword) {
+      _showError('Hasła nie są takie same');
+      setState(() => _isLoading = false);
+      return;
+    }
+    if (userEmail != repeatEmail) { 
+      _showError('Adresy email nie są takie same');
+      setState(() => _isLoading = false); 
+      return; 
     }
 
     try {
@@ -120,7 +135,7 @@ class _RegisterPageState extends State<RegisterPage> {
               controller: _userNameController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Username',
+                labelText: 'Nazwa użytkownika',
               ),
             ),
             const SizedBox(height: 20.0),
@@ -133,11 +148,28 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 20.0),
             TextField(
+              controller: _userEmailRepeatController,
+                decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Powtórz email',
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            TextField(
               controller: _userPasswordController,
               obscureText: true, // Hide the password input
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Hasło',
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            TextField(
+              controller: _userEmailPasswordRepeatController,
+              obscureText: true, // Hide the password input
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Powtórz hasło',
               ),
             ),
             const SizedBox(height: 20.0),

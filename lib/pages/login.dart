@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
       try {
         // Send login credentials to the backend
         final response = await http.post(
-          Uri.parse('$baseUrl/login'), // Replace with your backend URL
+          Uri.parse('$baseUrl/login'), 
           headers: {"Content-Type": "application/json"},
           body: json.encode({
             "user_name": userName,
@@ -37,16 +37,17 @@ class _LoginPageState extends State<LoginPage> {
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
           final userId = (data['user_id'] as num).toInt(); // Extract user_id from the response
+          final userNameDB = data['user_name'] as String;
 
           // Store the user_id in secure storage
-          await storage.write(key: 'user_name', value: userName);
+          await storage.write(key: 'user_name', value: userNameDB.isNotEmpty ? userNameDB : userName); 
           await storage.write(key: 'user_password', value: userPassword);
           await storage.write(key: 'user_id', value: userId.toString());
           // Navigate to the HomePage and pass the user_id
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(userId: userId, userName: userName, wasOpened: false),
+              builder: (context) => HomePage(userId: userId, userName: userNameDB.isNotEmpty ? userNameDB : userName, wasOpened: false),
             ),
           );
                 } else {
@@ -56,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         _showError('Error: $e');
       }
     } else {
-      _showError('Proszę wpisz oba username i hasło');
+      _showError('Proszę wpisz oba użytkownika lub email i hasło');
     }
   }
 
@@ -121,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
               controller: _userNameController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Username',
+                labelText: 'Użytkownik',
               ),
             ),
             const SizedBox(height: 20.0),
