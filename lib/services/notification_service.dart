@@ -392,11 +392,11 @@ class NotificationService {
   String _getTitle(Alert alert) {
     switch (alert.severity) {
       case AlertSeverity.critical:
-        return 'Ważne powiadomienie!';
+        return 'Notoday - Ważne!';
       case AlertSeverity.warning:
-        return 'Ostrzeżenie';
+        return 'Notoday - Ostrzeżenie';
       case AlertSeverity.info:
-        return 'Informacja';
+        return 'Notoday - Informacja';
     }
   }
   
@@ -406,20 +406,8 @@ class NotificationService {
   
   /// Get Android notification details based on alert severity
   AndroidNotificationDetails _getAndroidDetails(Alert alert) {
-    Color color;
-    
-    switch (alert.severity) {
-      case AlertSeverity.critical:
-        color = Colors.red;
-        break;
-      case AlertSeverity.warning:
-        color = Colors.orange;
-        break;
-      case AlertSeverity.info:
-        color = Colors.blue;
-        break;
-    }
-    
+    Color color = _getColorForSeverity(alert.severity); // We'll see if it is needed at all
+
     return AndroidNotificationDetails(
       _channelId,
       _channelName,

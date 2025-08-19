@@ -119,7 +119,7 @@ class Alert {
   }) {
     AlertSeverity severity;
     
-    if (trend.percentChange.abs() > 2) {
+    if (trend.percentChange.abs() > 10) {
       severity = AlertSeverity.critical;
     } else if (trend.percentChange.abs() > 1) {
       severity = AlertSeverity.warning;
@@ -306,7 +306,10 @@ class Alerting {
         // Two conditions met - severity based on worst change
         title = "Niepokojący trend";
         description = "Kilka wskaźników pokazuje niepokojący trend. Warto zwrócić uwagę na swoje samopoczucie i myślenie. ${getRandomAdvice()}";
-        
+        severity = AlertSeverity.warning; 
+
+
+
         // Determine severity based on the most concerning trend
         double worstChange = 0;
         worstChange = [
